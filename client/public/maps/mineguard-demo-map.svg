@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="720" viewBox="0 0 1440 720" role="img" aria-labelledby="title description">
+  <title id="title">Illustrative synthetic open-pit mine map</title>
+  <desc id="description">Original demo map artwork showing an open pit, terraced contours, haul roads, processing area, water, vegetation and safety zones. Not a real mine survey.</desc>
+  <defs>
+    <linearGradient id="ground" x2="0" y2="1">
+      <stop stop-color="#87927a"/>
+      <stop offset="1" stop-color="#485c4f"/>
+    </linearGradient>
+    <linearGradient id="pit" x2=".8" y2="1">
+      <stop stop-color="#c3a778"/>
+      <stop offset="1" stop-color="#766447"/>
+    </linearGradient>
+    <linearGradient id="water" x2="0" y2="1">
+      <stop stop-color="#68a9a3"/>
+      <stop offset="1" stop-color="#39787c"/>
+    </linearGradient>
+    <pattern id="grain" width="32" height="32" patternUnits="userSpaceOnUse">
+      <circle cx="4" cy="7" r="1" fill="#e8e0c4" opacity=".17"/>
+      <circle cx="23" cy="19" r="1.3" fill="#20392d" opacity=".2"/>
+      <path d="M8 27l5-2" stroke="#f2e6c9" stroke-opacity=".11"/>
+    </pattern>
+    <pattern id="grid" width="120" height="120" patternUnits="userSpaceOnUse">
+      <path d="M120 0H0V120" fill="none" stroke="#e5e7d4" stroke-opacity=".12"/>
+    </pattern>
+    <filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#15251e" flood-opacity=".48"/>
+    </filter>
+  </defs>
+
+  <rect width="1440" height="720" fill="url(#ground)"/>
+  <path d="M0 0h1440v170c-165 45-273 5-422 47S753 281 596 237s-288 9-596-48Z" fill="#98a083" opacity=".66"/>
+  <path d="M0 0h1440v720H0z" fill="url(#grain)"/>
+  <path d="M0 0h1440v720H0z" fill="url(#grid)"/>
+
+  <g fill="none" stroke="#d5d0ad" stroke-opacity=".32">
+    <path d="M-50 96C130 12 234 151 384 86S672 46 828 97s300 5 660-50" stroke-width="2"/>
+    <path d="M-30 126C144 43 246 182 397 116S680 77 837 128s310 7 655-49"/>
+    <path d="M-10 156C160 73 263 210 410 145S691 109 846 159s317 8 644-49"/>
+    <path d="M-30 573C136 481 284 613 435 562s270-63 440-8 322-3 600-61" stroke-width="2"/>
+    <path d="M-10 604C152 512 298 643 446 593s271-60 440-8 328-1 584-60"/>
+    <path d="M10 635C170 542 311 672 458 623s271-59 438-7 329 0 564-60"/>
+  </g>
+
+  <path d="M1170 0c-18 99 51 154 15 235s-17 120 39 174 37 125 6 181-18 93 43 130h167V0Z" fill="#385f5d" opacity=".78"/>
+  <path d="M1240-20c-34 92 43 160 8 237s-12 119 40 169 43 124 11 184-4 109 58 152" fill="none" stroke="url(#water)" stroke-width="40" opacity=".86"/>
+  <path d="M1240-20c-34 92 43 160 8 237s-12 119 40 169 43 124 11 184-4 109 58 152" fill="none" stroke="#b2d5bd" stroke-width="2" stroke-dasharray="12 14" opacity=".65"/>
+
+  <path d="M208 257c40-94 138-133 252-120 107 12 184 61 226 147 34 71 15 170-40 229-72 76-183 105-295 79-115-27-183-96-194-197-5-48 18-99 51-138Z" fill="#685f4e" opacity=".62"/>
+  <path d="M253 274c33-70 112-101 200-91 87 10 147 47 181 117 27 56 12 134-31 181-56 59-145 81-233 61-91-21-145-75-153-155-4-39 14-82 36-113Z" fill="url(#pit)" stroke="#d4c091" stroke-opacity=".78" stroke-width="3"/>
+  <path d="M290 286c27-53 87-77 155-69 67 7 113 36 139 88 20 42 9 101-23 137-43 45-110 62-177 46-69-16-110-57-116-117-3-30 10-62 22-85Z" fill="none" stroke="#e4cc9a" stroke-width="8" opacity=".75"/>
+  <path d="M320 297c22-37 62-53 109-47 46 5 78 25 96 60 14 29 6 69-16 94-30 31-77 43-124 32-48-11-76-40-81-81-2-21 7-43 16-58Z" fill="none" stroke="#f0d9aa" stroke-width="6" opacity=".72"/>
+  <path d="M347 311c13-21 39-30 67-26s48 16 59 37c8 18 3 42-10 57-19 20-47 27-76 20-29-6-46-24-49-49-1-14 4-27 9-39Z" fill="#8a7450" stroke="#ddc494" stroke-width="4"/>
+
+  <g fill="none" stroke-linecap="round" filter="url(#softShadow)">
+    <path d="M0 486C159 453 238 414 285 351s73-91 139-77 86 98 155 120 162 9 229-50 112-103 209-92" stroke="#ad9a71" stroke-width="25"/>
+    <path d="M0 486C159 453 238 414 285 351s73-91 139-77 86 98 155 120 162 9 229-50 112-103 209-92" stroke="#e0d2aa" stroke-width="2" stroke-dasharray="12 18"/>
+    <path d="M465 489c135 3 207-38 267-96s126-59 204-37 137 76 208 68" stroke="#ac956b" stroke-width="20"/>
+    <path d="M465 489c135 3 207-38 267-96s126-59 204-37 137 76 208 68" stroke="#e0d2aa" stroke-width="2" stroke-dasharray="10 17"/>
+    <path d="M830 0c-21 116-39 188-91 251s-69 119-19 192 104 128 117 277" stroke="#827858" stroke-width="12"/>
+    <path d="M830 0c-21 116-39 188-91 251s-69 119-19 192 104 128 117 277" stroke="#d9ca9f" stroke-width="2" stroke-dasharray="8 14"/>
+  </g>
+
+  <g fill="#35473c" opacity=".85">
+    <path d="m65 166 18-40 18 40h-9v21h-18v-21zM110 224l16-35 16 35h-8v19h-16v-19zM104 561l19-41 19 41h-9v22h-20v-22zM1016 128l18-38 18 38h-8v20h-20v-20zM1084 550l18-39 18 39h-9v21h-19v-21zM138 390l17-37 17 37h-8v20h-18v-20z"/>
+    <path d="M90 180h8v18h-8zM135 235h8v15h-8zM115 575h8v16h-8zM1040 139h8v18h-8zM1108 564h8v16h-8z"/>
+  </g>
+
+  <g filter="url(#softShadow)">
+    <path d="M887 182h92v68h-92zM990 154h68v96h-68zM1070 193h55v57h-55z" fill="#66746b" stroke="#d3d2ba" stroke-width="2"/>
+    <path d="M895 171h76v12h-76zM1001 142h46v12h-46zM1077 182h42v11h-42z" fill="#d4c795"/>
+    <path d="M899 195h12v42h-12zM921 195h12v42h-12zM943 195h12v42h-12zM1002 169h12v67h-12zM1023 169h12v67h-12z" fill="#9aa68e"/>
+    <path d="M967 181 1004 126 1042 181M1039 194l22-30 22 30" fill="none" stroke="#c8c5a8" stroke-width="5"/>
+  </g>
+
+  <g fill="#25382f" stroke="#aebba2" stroke-opacity=".55" stroke-width="2">
+    <path d="M94 340h80v48H94zM106 327h54v13h-54zM111 353h12v25h-12zM143 353h12v25h-12z"/>
+    <path d="M955 424h74v48h-74zM968 408h49v16h-49zM971 438h12v25h-12zM1003 438h12v25h-12z"/>
+    <path d="M590 576h105v51H590zM606 556h72v20h-72zM609 589h14v27h-14zM668 589h14v27h-14z"/>
+  </g>
+
+  <g font-family="Arial, sans-serif" font-size="15" font-weight="700" letter-spacing="2" fill="#f4f1dd" opacity=".9">
+    <text x="869" y="278">PROCESSING PLANT</text>
+    <text x="95" y="414">NORTH CAMP</text>
+    <text x="947" y="498">WATER RESERVE</text>
+    <text x="580" y="653">MAINTENANCE YARD</text>
+    <text x="246" y="524">OPEN PIT • DEMO</text>
+  </g>
+
+  <g transform="translate(1350 72)" fill="none" stroke="#f2f2de" stroke-width="3">
+    <path d="M0 30V0m0 0-10 13M0 0l10 13"/>
+    <text x="-5" y="51" fill="#f2f2de" stroke="none" font-family="Arial, sans-serif" font-size="13" font-weight="700">N</text>
+  </g>
+</svg>
