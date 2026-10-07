@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
 
 :root {
   font-family: Inter, system-ui, sans-serif;
@@ -46,16 +44,21 @@ body {
   border-radius: 999px;
 }
 
-@layer components {
-  .panel {
-    @apply rounded-2xl border border-slate-700/80 bg-slate-900/80 shadow-soft;
-  }
+.panel {
+  border: 1px solid rgb(51 65 85 / 0.8);
+  border-radius: 1rem;
+  background: rgb(15 23 42 / 0.8);
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.18);
+}
 
-  .panel-soft {
-    @apply rounded-xl border border-slate-700/70 bg-slate-800/80;
-  }
+.panel-soft {
+  border: 1px solid rgb(51 65 85 / 0.7);
+  border-radius: 0.75rem;
+  background: rgb(30 41 59 / 0.8);
+}
 
-  .table-cell {
-    @apply px-3 py-2 text-sm text-slate-200;
-  }
+.table-cell {
+  padding: 0.5rem 0.75rem;
+  color: rgb(226 232 240);
+  font-size: 0.875rem;
 }

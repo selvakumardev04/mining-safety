@@ -32,6 +32,10 @@ import {
 } from 'lucide-react';
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? '/api').replace(/\/+$/, '');
+const DEMO_LOGIN = Object.freeze({
+  email: import.meta.env.VITE_DEMO_EMAIL ?? '',
+  password: import.meta.env.VITE_DEMO_PASSWORD ?? '',
+});
 
 interface UserSession {
   id: string;
@@ -168,7 +172,22 @@ function App() {
   const [token, setToken] = useState<string | null>(() => localStorage.getItem('mineguard-token'));
   const [session, setSession] = useState<UserSession | null>(() => {
     const stored = localStorage.getItem('mineguard-user');
-    return stored ? JSON.parse(stored) : null;
+    if (!stored) return null;
+    try {
+      const parsed = JSON.parse(stored) as Partial<UserSession>;
+      return parsed.id && parsed.name && parsed.email && parsed.role
+        ? {
+            id: parsed.id,
+            name: parsed.name,
+            email: parsed.email,
+            role: parsed.role,
+            assignedMines: parsed.assignedMines ?? [],
+          }
+        : null;
+    } catch {
+      localStorage.removeItem('mineguard-user');
+      return null;
+    }
   });
   const [activeView, setActiveView] = useState('dashboard');
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
@@ -178,8 +197,7 @@ function App() {
   const [selectedMapSite, setSelectedMapSite] = useState('Korba North');
   const [createDialog, setCreateDialog] = useState<'mine' | 'incident' | 'camera' | 'worker' | null>(null);
   const [showPasswordRecovery, setShowPasswordRecovery] = useState(false);
-
-  const [loginForm, setLoginForm] = useState({ email: 'admin@mineguard.ai', password: 'admin123' });
+  const [loginForm, setLoginForm] = useState({ email: DEMO_LOGIN.email, password: DEMO_LOGIN.password });
   const isAuthenticated = Boolean(token);
 
   const navigateToView = (view: string) => {
@@ -386,11 +404,11 @@ function App() {
                   <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Account recovery</p>
                   <h2 id="password-recovery-heading" className="mt-2 text-2xl font-semibold text-white">Forgot password?</h2>
                   <p className="mt-3 text-sm leading-6 text-slate-300">Password-reset email is not configured for this demo, so no reset link can be sent and no account password will be changed here.</p>
-                  <p className="mt-3 text-sm leading-6 text-slate-300">For this prototype, use the demo account credentials shown on the welcome panel or in the README. For a real account, contact your MineGuard administrator to verify your identity and reset access securely.</p>
+                  <p className="mt-3 text-sm leading-6 text-slate-300">For this prototype, use the demo account credentials configured through VITE_DEMO_EMAIL and VITE_DEMO_PASSWORD in your deployment environment. For a real account, contact your MineGuard administrator to verify your identity and reset access securely.</p>
                   <button
                     type="button"
                     onClick={() => {
-                      setLoginForm({ email: 'admin@mineguard.ai', password: 'admin123' });
+                      setLoginForm(DEMO_LOGIN);
                       setShowPasswordRecovery(false);
                     }}
                     className="mt-5 w-full rounded-xl bg-emerald-500 px-4 py-3 font-medium text-slate-950 transition hover:bg-emerald-400"
@@ -435,7 +453,7 @@ function App() {
                       />
                     </div>
                     <button type="submit" className="w-full rounded-xl bg-emerald-500 px-4 py-3 font-medium text-slate-950 transition hover:bg-emerald-400">Log in</button>
-                    <button type="button" className="w-full rounded-xl border border-slate-600 px-4 py-3 text-slate-200 transition hover:border-slate-500" onClick={() => setLoginForm({ email: 'admin@mineguard.ai', password: 'admin123' })}>Use demo admin credentials</button>
+                    <button type="button" className="w-full rounded-xl border border-slate-600 px-4 py-3 text-slate-200 transition hover:border-slate-500" onClick={() => setLoginForm(DEMO_LOGIN)}>Use demo admin credentials</button>
                   </form>
                 </>
               )}
