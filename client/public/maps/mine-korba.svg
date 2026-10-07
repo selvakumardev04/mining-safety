@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="720" viewBox="0 0 1440 720" role="img" aria-labelledby="title desc">
+  <title id="title">Synthetic Korba North open-pit mine map</title>
+  <desc id="desc">Original illustrative demo map with a terraced open pit, switchback roads, coal yard and water reserve. Not a surveyed mine map.</desc>
+  <defs>
+    <linearGradient id="land" x2="0" y2="1"><stop stop-color="#87917a"/><stop offset="1" stop-color="#40594d"/></linearGradient>
+    <linearGradient id="pit" x2=".8" y2="1"><stop stop-color="#c2a577"/><stop offset="1" stop-color="#68563d"/></linearGradient>
+    <pattern id="grain" width="34" height="34" patternUnits="userSpaceOnUse"><circle cx="5" cy="9" r="1.5" fill="#f2e5c5" opacity=".2"/><circle cx="25" cy="25" r="1.2" fill="#203c30" opacity=".3"/></pattern>
+  </defs>
+  <rect width="1440" height="720" fill="url(#land)"/><rect width="1440" height="720" fill="url(#grain)"/>
+  <path d="M1190 0c-40 150 65 205 15 320s90 180 25 400h210V0Z" fill="#315b58"/><path d="M1260 0c-30 150 45 210 10 315s65 180 25 405" fill="none" stroke="#64a6a0" stroke-width="48" opacity=".8"/>
+  <g fill="none" stroke="#d8d0aa" opacity=".35"><path d="M0 110q210-100 400 0t410 0 410 0 300-20"/><path d="M0 145q210-100 400 0t410 0 410 0 300-20"/><path d="M0 580q220-100 420 0t400 0 400 0 240-30"/><path d="M0 615q220-100 420 0t400 0 400 0 240-30"/></g>
+  <path d="M205 250q60-145 260-145t285 130q80 145-5 275T460 625Q235 600 165 460t40-210Z" fill="#504d40" opacity=".7"/>
+  <path d="M250 260q55-105 205-105t225 105q55 100-5 210T470 560Q290 540 230 430t20-170Z" fill="url(#pit)" stroke="#d6bc8a" stroke-width="7"/>
+  <path d="M300 285q45-75 155-75t170 78q43 75-7 155T470 505q-130-10-170-90t0-130Z" fill="none" stroke="#ead3a5" stroke-width="13" opacity=".8"/>
+  <path d="M350 310q35-45 105-45t115 48q30 50-10 100t-100 52q-85-4-115-54t5-101Z" fill="none" stroke="#f3ddb1" stroke-width="9"/>
+  <path d="M0 500q190-20 290-155t235-15 180 80 235-110 270-5" fill="none" stroke="#aa956b" stroke-width="28"/><path d="M0 500q190-20 290-155t235-15 180 80 235-110 270-5" fill="none" stroke="#eee0bb" stroke-width="2" stroke-dasharray="12 18"/>
+  <g fill="#65756a" stroke="#ccd0b6" stroke-width="4"><path d="M880 180h150v100H880zM1050 220h95v70h-95zM855 155h95v25h-95z"/><path d="M900 195v65m35-65v65m35-65v65"/></g>
+  <g fill="#283d32"><path d="m90 190 26-55 26 55h-12v30h-28v-30zM1100 520l30-60 30 60h-14v32h-32v-32zM160 570l22-47 22 47h-11v27h-22v-27z"/></g>
+  <g fill="#f4f0d9" font-family="Arial,sans-serif" font-weight="700" letter-spacing="3"><text x="245" y="600" font-size="22">KORBA NORTH • OPEN PIT</text><text x="880" y="320" font-size="16">COAL HANDLING</text><text x="1240" y="380" font-size="15">WATER RESERVE</text></g>
+</svg>

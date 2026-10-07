@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="720" viewBox="0 0 1440 720" role="img" aria-labelledby="title desc">
+  <title id="title">Synthetic Neyveli West lignite mine map</title>
+  <desc id="desc">Original illustrative demo map with broad shallow lignite benches, green reclamation plots, a power station and cooling ponds. Not a surveyed mine map.</desc>
+  <defs><linearGradient id="land" x2="0" y2="1"><stop stop-color="#819377"/><stop offset="1" stop-color="#3f5b4d"/></linearGradient><linearGradient id="lignite" x2="0" y2="1"><stop stop-color="#b99d6e"/><stop offset="1" stop-color="#685943"/></linearGradient></defs>
+  <rect width="1440" height="720" fill="url(#land)"/>
+  <g fill="none" stroke="#dce0bd" stroke-width="3" opacity=".34"><path d="M-20 95q190-100 380 0t380 0 380 0 340-25"/><path d="M-20 130q190-100 380 0t380 0 380 0 340-25"/><path d="M-20 585q190-100 380 0t380 0 380 0 340-25"/><path d="M-20 620q190-100 380 0t380 0 380 0 340-25"/></g>
+  <path d="M150 185h700l180 105v185L850 580H190L90 440V285Z" fill="#52634f" stroke="#b9c9a4" stroke-width="6"/>
+  <path d="M205 225h610l145 90v125L805 530H230L150 415V300Z" fill="url(#lignite)" stroke="#ddc492" stroke-width="7"/>
+  <path d="M250 263h520l110 67v95L765 490H270l-65-95v-90Z" fill="none" stroke="#ead5a5" stroke-width="13"/>
+  <path d="M305 300h420l65 45v55l-75 55H315l-40-62v-40Z" fill="none" stroke="#f1dcae" stroke-width="10"/>
+  <g fill="#547658" stroke="#b4ca9c" stroke-width="3"><path d="M70 120h180v75H70zM275 105h160v65H275zM90 520h120v95H90zM1110 510h160v80h-160z"/></g>
+  <g fill="#35483d" opacity=".9"><path d="m95 115 22-48 22 48h-11v26h-22v-26zM180 118l20-44 20 44h-10v24h-20v-24zM1160 520l21-46 21 46h-10v25h-22v-25z"/></g>
+  <path d="M1080 100h250v185h-250z" fill="#52665d" stroke="#d5d4bb" stroke-width="5"/><path d="M1100 80h85v20h-85zM1200 65h80v35h-80zM1105 135h30v125h-30zM1155 135h30v125h-30zM1205 135h30v125h-30zM1255 135h30v125h-30z" fill="#a7ad91"/>
+  <path d="M930 330q55-65 115 0t-115 0ZM910 410q65-75 130 0t-130 0Z" fill="#478b88" stroke="#b0d2b9" stroke-width="4"/>
+  <path d="M0 465q160-30 290 0t260 0" fill="none" stroke="#aa956a" stroke-width="22" stroke-dasharray="14 13"/>
+  <g fill="#f4efd8" font-family="Arial,sans-serif" font-weight="700" letter-spacing="3"><text x="255" y="560" font-size="22">NEYVELI WEST • LIGNITE</text><text x="1080" y="315" font-size="16">POWER STATION</text><text x="890" y="485" font-size="15">COOLING PONDS</text><text x="75" y="220" font-size="15">RECLAMATION</text></g>
+</svg>

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="720" viewBox="0 0 1440 720" role="img" aria-labelledby="title desc">
+  <title id="title">Synthetic Singrauli Central mine map</title>
+  <desc id="desc">Original illustrative mine map with two open cuts, coal stockpiles, haul routes and a settling pond. Not a surveyed mine map.</desc>
+  <defs><linearGradient id="land" x2="0" y2="1"><stop stop-color="#95937a"/><stop offset="1" stop-color="#4e5c49"/></linearGradient><pattern id="grid" width="70" height="70" patternUnits="userSpaceOnUse"><path d="M70 0H0V70" fill="none" stroke="#e8e2c9" stroke-opacity=".1"/></pattern></defs>
+  <rect width="1440" height="720" fill="url(#land)"/><rect width="1440" height="720" fill="url(#grid)"/>
+  <path d="M0 70q180 65 355 0t350 0 360 0 375-15M0 620q220-70 430 0t390 0 360 0 260-30" fill="none" stroke="#d9d1ad" stroke-width="3" opacity=".35"/>
+  <path d="M300 190q105-90 230-20t70 210-185 155-200-85 85-260Z" fill="#685840" stroke="#cab182" stroke-width="10"/>
+  <path d="M355 220q75-60 160-5t42 150-130 105-135-60 63-190Z" fill="none" stroke="#e4c896" stroke-width="14"/>
+  <path d="M790 90q130-40 215 75t25 230-205 105-140-130 105-280Z" fill="#76664b" stroke="#d1ba8a" stroke-width="10"/>
+  <path d="M835 135q90-28 150 55t15 160-145 70-96-90 76-195Z" fill="none" stroke="#ebd2a0" stroke-width="13"/>
+  <path d="M0 465q210 40 370-95t310-20 320 60 260-115 180-30M95 630q220-35 370-110t295 20 300 0 380-95" fill="none" stroke="#ae966b" stroke-width="24"/>
+  <path d="M0 465q210 40 370-95t310-20 320 60 260-115 180-30M95 630q220-35 370-110t295 20 300 0 380-95" fill="none" stroke="#eee1b7" stroke-width="2" stroke-dasharray="12 16"/>
+  <g fill="#77604b"><path d="M1060 435q85-110 145 0t-145 0ZM1170 505q70-90 120 0t-120 0ZM970 515q54-72 95 0t-95 0Z"/></g>
+  <path d="M1260 95q-65 95-10 190t-15 190 55 180" fill="none" stroke="#4a8582" stroke-width="58" opacity=".82"/><path d="M1260 95q-65 95-10 190t-15 190 55 180" fill="none" stroke="#b4d3bd" stroke-width="3" stroke-dasharray="14 14"/>
+  <g fill="#647365" stroke="#d7d3ba" stroke-width="3"><path d="M105 160h95v70h-95zM215 175h70v55h-70zM1030 160h115v65h-115z"/></g>
+  <g fill="#f5f0d8" font-family="Arial,sans-serif" font-weight="700" letter-spacing="3"><text x="270" y="395" font-size="21">WEST CUT</text><text x="820" y="390" font-size="21">EAST CUT</text><text x="1030" y="560" font-size="16">COAL STOCKYARD</text><text x="80" y="280" font-size="21">SINGRAULI CENTRAL</text></g>
+</svg>

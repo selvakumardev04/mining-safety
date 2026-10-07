@@ -1,4 +1,4 @@
-import { type FormEvent, useEffect, useState } from 'react';
+import { type FormEvent, useEffect, useRef, useState } from 'react';
 import { Toaster, toast } from 'sonner';
 import {
   Area,
@@ -31,7 +31,7 @@ import {
   Wrench,
 } from 'lucide-react';
 
-const API_BASE = 'http://localhost:5001/api';
+const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? '/api').replace(/\/+$/, '');
 
 interface UserSession {
   id: string;
@@ -113,7 +113,14 @@ async function authFetch<T>(path: string, token?: string, options: RequestInit =
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(errorText || 'Request failed');
+    let errorMessage = errorText || 'Request failed';
+    try {
+      const payload = JSON.parse(errorText) as { message?: unknown };
+      if (typeof payload.message === 'string') errorMessage = payload.message;
+    } catch {
+      // Keep the original response text when the server does not return JSON.
+    }
+    throw new Error(errorMessage);
   }
 
   return response.json() as Promise<T>;
@@ -169,10 +176,15 @@ function App() {
   const [selectedCameraId, setSelectedCameraId] = useState('');
   const [selectedDetectionId, setSelectedDetectionId] = useState('');
   const [selectedMapSite, setSelectedMapSite] = useState('Korba North');
-  const [createDialog, setCreateDialog] = useState<'mine' | 'incident' | 'camera' | null>(null);
+  const [createDialog, setCreateDialog] = useState<'mine' | 'incident' | 'camera' | 'worker' | null>(null);
+  const [showPasswordRecovery, setShowPasswordRecovery] = useState(false);
 
   const [loginForm, setLoginForm] = useState({ email: 'admin@mineguard.ai', password: 'admin123' });
   const isAuthenticated = Boolean(token);
+
+  const navigateToView = (view: string) => {
+    setActiveView(view);
+  };
 
   useEffect(() => {
     if (!token) return;
@@ -230,7 +242,7 @@ function App() {
     setDashboard((current) => current ? update(current) : current);
   };
 
-  const handleCreateRecord = (event: FormEvent<HTMLFormElement>) => {
+  const handleCreateRecord = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const now = new Date().toISOString();
@@ -308,6 +320,34 @@ function App() {
       }));
       setSelectedCameraId(cameraId);
       toast.success('Simulated camera added to this demo session');
+    } else if (createDialog === 'worker') {
+      if (session?.role !== 'ADMIN' || !token) {
+        toast.error('Only administrators can add employees');
+        return;
+      }
+      try {
+        const response = await authFetch<{ worker: DashboardData['workers'][number] }>('/workers', token, {
+          method: 'POST',
+          body: JSON.stringify({
+            name: String(formData.get('name') ?? '').trim(),
+            role: String(formData.get('role') ?? '').trim(),
+            mine: String(formData.get('mine') ?? ''),
+            department: String(formData.get('department') ?? '').trim(),
+            shift: String(formData.get('shift') ?? ''),
+          }),
+        });
+        updateDashboard((current) => ({
+          ...current,
+          workers: [...current.workers, response.worker],
+          summary: { ...current.summary, totalWorkers: current.workers.length + 1 },
+          kpis: current.kpis.map((kpi) => kpi.label === 'Active Workers' ? { ...kpi, value: current.workers.length + 1 } : kpi),
+          mines: current.mines.map((mine) => mine.id === response.worker.mine ? { ...mine, workerCount: mine.workerCount + 1 } : mine),
+        }));
+        toast.success(`${response.worker.name} added to the employee roster`);
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : 'Could not add employee');
+        return;
+      }
     }
     setCreateDialog(null);
   };
@@ -341,34 +381,64 @@ function App() {
               </div>
             </div>
             <div className="p-8 md:p-10">
-              <div className="mb-6">
-                <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Welcome</p>
-                <h2 className="mt-2 text-3xl font-semibold text-white">Sign in</h2>
-              </div>
-              <form className="space-y-5" onSubmit={handleLogin}>
-                <div>
-                  <label className="mb-1 block text-sm text-slate-300">Email</label>
-                  <input
-                    type="email"
-                    value={loginForm.email}
-                    onChange={(e) => setLoginForm((prev) => ({ ...prev, email: e.target.value }))}
-                    className="w-full rounded-xl border border-slate-600 bg-slate-950 px-3 py-2.5 text-white outline-none ring-0 transition focus:border-emerald-500"
-                    placeholder="admin@mineguard.ai"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1 block text-sm text-slate-300">Password</label>
-                  <input
-                    type="password"
-                    value={loginForm.password}
-                    onChange={(e) => setLoginForm((prev) => ({ ...prev, password: e.target.value }))}
-                    className="w-full rounded-xl border border-slate-600 bg-slate-950 px-3 py-2.5 text-white outline-none ring-0 transition focus:border-emerald-500"
-                    placeholder="••••••••"
-                  />
-                </div>
-                <button type="submit" className="w-full rounded-xl bg-emerald-500 px-4 py-3 font-medium text-slate-950 transition hover:bg-emerald-400">Log in</button>
-                <button type="button" className="w-full rounded-xl border border-slate-600 px-4 py-3 text-slate-200 transition hover:border-slate-500" onClick={() => setLoginForm({ email: 'admin@mineguard.ai', password: 'admin123' })}>Use demo admin credentials</button>
-              </form>
+              {showPasswordRecovery ? (
+                <section aria-labelledby="password-recovery-heading" className="rounded-2xl border border-slate-700 bg-slate-950/70 p-5">
+                  <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Account recovery</p>
+                  <h2 id="password-recovery-heading" className="mt-2 text-2xl font-semibold text-white">Forgot password?</h2>
+                  <p className="mt-3 text-sm leading-6 text-slate-300">Password-reset email is not configured for this demo, so no reset link can be sent and no account password will be changed here.</p>
+                  <p className="mt-3 text-sm leading-6 text-slate-300">For this prototype, use the demo account credentials shown on the welcome panel or in the README. For a real account, contact your MineGuard administrator to verify your identity and reset access securely.</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLoginForm({ email: 'admin@mineguard.ai', password: 'admin123' });
+                      setShowPasswordRecovery(false);
+                    }}
+                    className="mt-5 w-full rounded-xl bg-emerald-500 px-4 py-3 font-medium text-slate-950 transition hover:bg-emerald-400"
+                  >
+                    Use demo admin credentials
+                  </button>
+                  <button type="button" onClick={() => setShowPasswordRecovery(false)} className="mt-3 w-full rounded-xl border border-slate-600 px-4 py-3 text-slate-200 transition hover:border-slate-500">Back to sign in</button>
+                </section>
+              ) : (
+                <>
+                  <div className="mb-6">
+                    <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Welcome</p>
+                    <h2 className="mt-2 text-3xl font-semibold text-white">Sign in</h2>
+                  </div>
+                  <form className="space-y-5" onSubmit={handleLogin}>
+                    <div>
+                      <label className="mb-1 block text-sm text-slate-300">Email</label>
+                      <input
+                        type="email"
+                        autoComplete="username"
+                        required
+                        value={loginForm.email}
+                        onChange={(e) => setLoginForm((prev) => ({ ...prev, email: e.target.value }))}
+                        className="w-full rounded-xl border border-slate-600 bg-slate-950 px-3 py-2.5 text-white outline-none ring-0 transition focus:border-emerald-500"
+                        placeholder="admin@mineguard.ai"
+                      />
+                    </div>
+                    <div>
+                      <div className="mb-1 flex items-center justify-between gap-3">
+                        <label htmlFor="login-password" className="block text-sm text-slate-300">Password</label>
+                        <button type="button" onClick={() => setShowPasswordRecovery(true)} className="text-xs font-medium text-emerald-300 hover:text-emerald-200 hover:underline">Forgot password?</button>
+                      </div>
+                      <input
+                        id="login-password"
+                        type="password"
+                        autoComplete="current-password"
+                        required
+                        value={loginForm.password}
+                        onChange={(e) => setLoginForm((prev) => ({ ...prev, password: e.target.value }))}
+                        className="w-full rounded-xl border border-slate-600 bg-slate-950 px-3 py-2.5 text-white outline-none ring-0 transition focus:border-emerald-500"
+                        placeholder="••••••••"
+                      />
+                    </div>
+                    <button type="submit" className="w-full rounded-xl bg-emerald-500 px-4 py-3 font-medium text-slate-950 transition hover:bg-emerald-400">Log in</button>
+                    <button type="button" className="w-full rounded-xl border border-slate-600 px-4 py-3 text-slate-200 transition hover:border-slate-500" onClick={() => setLoginForm({ email: 'admin@mineguard.ai', password: 'admin123' })}>Use demo admin credentials</button>
+                  </form>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -394,7 +464,7 @@ function App() {
             <button
               key={id}
               type="button"
-              onClick={() => setActiveView(id)}
+              onClick={() => navigateToView(id)}
               className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition ${activeView === id ? 'bg-emerald-500/15 text-emerald-200' : 'text-slate-300 hover:bg-slate-800'}`}
             >
               <Icon className="h-4 w-4" />
@@ -422,7 +492,7 @@ function App() {
         <nav aria-label="Main navigation" className="border-b border-slate-800 bg-slate-900/80 px-3 py-2 lg:hidden">
           <div className="flex gap-2 overflow-x-auto pb-1">
             {navItems.map(({ id, label, icon: Icon }) => (
-              <button key={id} type="button" onClick={() => setActiveView(id)} aria-current={activeView === id ? 'page' : undefined} className={`flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-xs ${activeView === id ? 'bg-emerald-500/15 text-emerald-200' : 'text-slate-300 hover:bg-slate-800'}`}>
+              <button key={id} type="button" onClick={() => navigateToView(id)} aria-current={activeView === id ? 'page' : undefined} className={`flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-xs ${activeView === id ? 'bg-emerald-500/15 text-emerald-200' : 'text-slate-300 hover:bg-slate-800'}`}>
                 <Icon className="h-4 w-4" />{label}
               </button>
             ))}
@@ -435,7 +505,7 @@ function App() {
           ) : !dashboard ? (
             <div className="panel p-8 text-slate-300">No dashboard data available.</div>
           ) : (
-            <>{renderContent(activeView, dashboard, selectedCameraId, setSelectedCameraId, selectedDetectionId, setSelectedDetectionId, selectedMapSite, setSelectedMapSite, setCreateDialog, setActiveView, updateDashboard, exportReport, session?.name ?? 'Current user')}</>
+            <>{renderContent(activeView, dashboard, selectedCameraId, setSelectedCameraId, selectedDetectionId, setSelectedDetectionId, selectedMapSite, setSelectedMapSite, setCreateDialog, navigateToView, updateDashboard, exportReport, session?.name ?? 'Current user', session?.role === 'ADMIN', token ?? '')}</>
           )}
         </div>
       </main>
@@ -445,7 +515,7 @@ function App() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Demo session only</p>
-                <h2 id="create-record-title" className="mt-1 text-xl font-semibold text-white">{createDialog === 'mine' ? 'Add mine' : createDialog === 'camera' ? 'Add simulated camera' : 'Report incident'}</h2>
+                <h2 id="create-record-title" className="mt-1 text-xl font-semibold text-white">{createDialog === 'mine' ? 'Add mine' : createDialog === 'camera' ? 'Add simulated camera' : createDialog === 'worker' ? 'Add new employee' : 'Report incident'}</h2>
               </div>
               <button type="button" onClick={() => setCreateDialog(null)} className="rounded-lg border border-slate-700 px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-800">Close</button>
             </div>
@@ -455,6 +525,17 @@ function App() {
                   <label className="text-sm text-slate-300">Mine name<input name="name" required maxLength={80} className="mt-1 w-full rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-white" /></label>
                   <label className="text-sm text-slate-300">Location<input name="location" required maxLength={120} className="mt-1 w-full rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-white" /></label>
                   <label className="text-sm text-slate-300">Mine type<select name="type" className="mt-1 w-full rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-white"><option>Coal</option><option>Metal</option><option>Lignite</option><option>Other</option></select></label>
+                </>
+              ) : createDialog === 'worker' ? (
+                <>
+                  <label className="text-sm text-slate-300">Employee name<input name="name" required minLength={2} maxLength={100} autoComplete="name" className="mt-1 w-full rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-white" /></label>
+                  <label className="text-sm text-slate-300">Job title<input name="role" required maxLength={80} placeholder="e.g. Equipment Operator" className="mt-1 w-full rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-white" /></label>
+                  <label className="text-sm text-slate-300">Mine<select name="mine" required className="mt-1 w-full rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-white">{dashboard.mines.map((mine) => <option key={mine.id} value={mine.id}>{mine.name}</option>)}</select></label>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <label className="text-sm text-slate-300">Department<input name="department" required maxLength={80} placeholder="e.g. Operations" className="mt-1 w-full rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-white" /></label>
+                    <label className="text-sm text-slate-300">Shift<select name="shift" required className="mt-1 w-full rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-white"><option value="A">Shift A</option><option value="B">Shift B</option><option value="C">Shift C</option></select></label>
+                  </div>
+                  <p className="text-xs text-amber-200">New employee starts with PPE and safety status marked for assessment. This demo roster is held in server memory and resets when the server restarts.</p>
                 </>
               ) : createDialog === 'camera' ? (
                 <>
@@ -475,13 +556,297 @@ function App() {
                 </>
               )}
             </div>
-            <p className="mt-4 text-xs text-amber-200">Demo records are held in the current browser session and are not saved to the server.</p>
-            <button type="submit" className="mt-4 w-full rounded-xl bg-emerald-400 px-4 py-2.5 font-semibold text-slate-950 hover:bg-emerald-300">Create demo record</button>
+            {createDialog !== 'worker' && <p className="mt-4 text-xs text-amber-200">Demo records are held in the current browser session and are not saved to the server.</p>}
+            <button type="submit" className="mt-4 w-full rounded-xl bg-emerald-400 px-4 py-2.5 font-semibold text-slate-950 hover:bg-emerald-300">{createDialog === 'worker' ? 'Add employee' : 'Create demo record'}</button>
           </form>
         </div>
       )}
       <Toaster richColors position="top-right" />
     </div>
+  );
+}
+
+function LiveWebcamDemo() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const requestIdRef = useRef(0);
+  const [stream, setStream] = useState<MediaStream | null>(null);
+  const [error, setError] = useState('');
+  const [capturedFrame, setCapturedFrame] = useState('');
+  const [showDemoResult, setShowDemoResult] = useState(false);
+
+  useEffect(() => () => {
+    requestIdRef.current += 1;
+    stream?.getTracks().forEach((track) => track.stop());
+  }, [stream]);
+
+  useEffect(() => {
+    if (!stream || !videoRef.current) return;
+    const video = videoRef.current;
+    video.srcObject = stream;
+    void video.play().catch(() => {
+      setError('Could not start camera preview. Check camera permission and try again.');
+    });
+  }, [stream]);
+
+  const startCamera = async () => {
+    const requestId = requestIdRef.current + 1;
+    requestIdRef.current = requestId;
+    setError('');
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setError('Live camera is unavailable here. Use localhost or HTTPS in a supported browser.');
+      return;
+    }
+    try {
+      const cameraStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: 'environment' } },
+        audio: false,
+      });
+      if (requestId !== requestIdRef.current) {
+        cameraStream.getTracks().forEach((track) => track.stop());
+        return;
+      }
+      setCapturedFrame('');
+      setShowDemoResult(false);
+      setStream(cameraStream);
+    } catch (cameraError) {
+      const message = cameraError instanceof DOMException && cameraError.name === 'NotAllowedError'
+        ? 'Camera permission was denied. Allow camera access in your browser settings and try again.'
+        : cameraError instanceof DOMException && cameraError.name === 'NotFoundError'
+          ? 'No camera was found on this device.'
+          : 'Could not access the camera. Check that it is connected and not being used by another app.';
+      setError(message);
+    }
+  };
+
+  const stopCamera = () => {
+    requestIdRef.current += 1;
+    stream?.getTracks().forEach((track) => track.stop());
+    if (videoRef.current) videoRef.current.srcObject = null;
+    setStream(null);
+  };
+
+  const captureFrame = () => {
+    const video = videoRef.current;
+    if (!video || video.videoWidth === 0 || video.videoHeight === 0) {
+      setError('Camera preview is not ready yet. Wait for the video, then capture again.');
+      return;
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const context = canvas.getContext('2d');
+    if (!context) {
+      setError('Could not capture a local camera frame in this browser.');
+      return;
+    }
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    setCapturedFrame(canvas.toDataURL('image/jpeg', 0.86));
+    setShowDemoResult(false);
+    setError('');
+  };
+
+  return (
+    <section aria-labelledby="live-webcam-heading" className="mt-4 rounded-xl border border-slate-700 bg-slate-950/60 p-3">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="text-[10px] uppercase tracking-[0.16em] text-slate-400">Device camera</p>
+          <h5 id="live-webcam-heading" className="mt-1 text-sm font-semibold text-white">Live webcam preview</h5>
+        </div>
+        <span className={`rounded-full border px-2 py-1 text-[9px] font-semibold ${stream ? 'border-emerald-400/30 bg-emerald-500/10 text-emerald-200' : 'border-slate-600 text-slate-300'}`}>{stream ? 'CAMERA ON • LOCAL PREVIEW' : 'CAMERA OFF'}</span>
+      </div>
+      <div className="mt-3 grid gap-3 sm:grid-cols-[minmax(0,1fr)_112px]">
+        <div className="relative aspect-video overflow-hidden rounded-lg border border-slate-700 bg-slate-900">
+          {stream ? (
+            <video ref={videoRef} autoPlay muted playsInline aria-label="Local live webcam preview" className="h-full w-full object-cover" />
+          ) : capturedFrame ? (
+            <img src={capturedFrame} alt="Locally captured webcam frame" className="h-full w-full object-cover" />
+          ) : (
+            <div className="flex h-full items-center justify-center p-4 text-center text-xs text-slate-400">Camera is off. Start preview to request access to this device’s camera.</div>
+          )}
+          {stream && <span className="absolute left-2 top-2 rounded bg-slate-950/80 px-2 py-1 text-[9px] font-semibold text-emerald-200">LIVE PREVIEW • NOT RECORDED</span>}
+        </div>
+        <div className="flex flex-col gap-2">
+          {stream && capturedFrame && <img src={capturedFrame} alt="Captured frame from local webcam preview" className="h-20 w-full rounded-lg border border-slate-700 object-cover" />}
+          <button type="button" onClick={stream ? stopCamera : startCamera} className={`rounded-lg px-3 py-2 text-xs font-semibold transition ${stream ? 'border border-rose-400/40 text-rose-200 hover:bg-rose-500/10' : 'bg-emerald-400 text-slate-950 hover:bg-emerald-300'}`}>{stream ? 'Stop camera' : 'Start camera'}</button>
+          <button type="button" onClick={captureFrame} disabled={!stream} className="rounded-lg border border-slate-600 px-3 py-2 text-xs font-medium text-slate-200 transition hover:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-40">Capture frame</button>
+          {capturedFrame && <button type="button" onClick={() => { setShowDemoResult(true); setError(''); }} className="rounded-lg border border-amber-300/40 px-3 py-2 text-xs font-semibold text-amber-100 transition hover:bg-amber-500/10">Run demo scan</button>}
+        </div>
+      </div>
+      {error && <p role="alert" className="mt-3 rounded-lg border border-rose-400/30 bg-rose-500/5 p-2.5 text-xs leading-5 text-rose-200">{error}</p>}
+      {showDemoResult && capturedFrame && (
+        <div aria-live="polite" className="mt-3 rounded-lg border border-amber-400/30 bg-amber-500/5 p-3">
+          <p className="text-xs font-semibold text-amber-200">SIMULATED RESULT • Live frame was not analyzed</p>
+          <p className="mt-2 text-xs leading-5 text-slate-200">Example PPE result: helmet detected, safety vest detected, respirator missing. This fixed demo result is not derived from the camera image.</p>
+          <p className="mt-2 text-[10px] leading-4 text-slate-400">The preview and captured frame stay in this page’s browser memory and are not uploaded or saved. Stop the camera when finished. Use a trained supervisor and approved site procedures for real PPE checks.</p>
+        </div>
+      )}
+      <p className="mt-3 text-[10px] leading-4 text-slate-400">The browser will request camera permission. Video is previewed locally only; no recording, server upload, facial recognition, or real PPE model is active.</p>
+    </section>
+  );
+}
+
+interface RoboflowModelStatus {
+  configured: boolean;
+  message: string;
+}
+
+interface RoboflowScanResult {
+  provider: string;
+  mode: string;
+  disclaimer: string;
+  detections: Array<{ label: string; confidence: number }>;
+  equipment: Array<{ name: string; status: 'DETECTED' | 'NO_DETECTION'; confidence: number | null }>;
+}
+
+function RoboflowImageScanner({ token }: { token: string }) {
+  const [previewUrl, setPreviewUrl] = useState('/vision/demo-worker-portrait.svg');
+  const [file, setFile] = useState<File | null>(null);
+  const [fileName, setFileName] = useState('Illustrative demo worker portrait');
+  const [modelStatus, setModelStatus] = useState<RoboflowModelStatus | null>(null);
+  const [statusError, setStatusError] = useState('');
+  const [scanResult, setScanResult] = useState<RoboflowScanResult | null>(null);
+  const [scanError, setScanError] = useState('');
+  const [isScanning, setIsScanning] = useState(false);
+  const [imageConsent, setImageConsent] = useState(false);
+  const [imageDimensions, setImageDimensions] = useState('');
+
+  useEffect(() => {
+    let active = true;
+    void authFetch<RoboflowModelStatus>('/vision/model-status', token)
+      .then((status) => {
+        if (active) setModelStatus(status);
+      })
+      .catch((error: unknown) => {
+        if (active) setStatusError(error instanceof Error ? error.message : 'Could not check AI model status.');
+      });
+    return () => {
+      active = false;
+    };
+  }, [token]);
+
+  useEffect(() => () => {
+    if (previewUrl.startsWith('blob:')) URL.revokeObjectURL(previewUrl);
+  }, [previewUrl]);
+
+  const selectImage = (selectedFile: File | undefined) => {
+    if (!selectedFile) return;
+    if (!['image/png', 'image/jpeg', 'image/webp'].includes(selectedFile.type)) {
+      setScanError('Choose a PNG, JPEG, or WebP image.');
+      return;
+    }
+    if (selectedFile.size > 5 * 1024 * 1024) {
+      setScanError('Image must be 5 MB or smaller.');
+      return;
+    }
+    const nextUrl = URL.createObjectURL(selectedFile);
+    setPreviewUrl(nextUrl);
+    setFile(selectedFile);
+    setFileName(selectedFile.name);
+    setImageConsent(false);
+    setScanResult(null);
+    setScanError('');
+    setImageDimensions('');
+    const image = new Image();
+    image.onload = () => {
+      setImageDimensions(`${image.naturalWidth} × ${image.naturalHeight}`);
+      if (image.naturalWidth < 320 || image.naturalHeight < 320) {
+        setScanError('Image is small; results may be unreliable. Use a clear image at least 320 pixels wide and high where possible.');
+      }
+    };
+    image.onerror = () => setScanError('The selected image could not be opened. Choose another image.');
+    image.src = nextUrl;
+  };
+
+  const analyzeImage = async () => {
+    if (!file || !imageConsent || !modelStatus?.configured || isScanning) return;
+    setIsScanning(true);
+    setScanError('');
+    setScanResult(null);
+    try {
+      const result = await authFetch<RoboflowScanResult>('/vision/analyze', token, {
+        method: 'POST',
+        headers: { 'Content-Type': file.type },
+        body: file,
+      });
+      setScanResult(result);
+    } catch (error) {
+      setScanError(error instanceof Error ? error.message : 'PPE model analysis failed.');
+    } finally {
+      setIsScanning(false);
+    }
+  };
+
+  return (
+    <section aria-labelledby="person-image-scan-heading" className="mt-4 rounded-xl border border-slate-700 bg-slate-950/60 p-3">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="text-[10px] uppercase tracking-[0.16em] text-slate-400">PPE model scan</p>
+          <h5 id="person-image-scan-heading" className="mt-1 text-sm font-semibold text-white">Analyze a person image</h5>
+        </div>
+        <span className={`rounded-full border px-2 py-1 text-[9px] font-semibold ${modelStatus?.configured ? 'border-emerald-400/30 bg-emerald-500/10 text-emerald-200' : 'border-amber-400/30 bg-amber-500/5 text-amber-200'}`}>
+          {modelStatus ? (modelStatus.configured ? 'ROBOFLOW MODEL READY' : 'MODEL NOT CONFIGURED') : statusError ? 'STATUS UNAVAILABLE' : 'CHECKING MODEL'}
+        </span>
+      </div>
+      <div className="mt-3 grid gap-3 sm:grid-cols-[112px_minmax(0,1fr)]">
+        <div className="h-32 overflow-hidden rounded-lg border border-slate-700 bg-slate-900">
+          <img src={previewUrl} alt="Local preview of the selected image; default is an illustrative demo portrait" className="h-full w-full object-cover" />
+        </div>
+        <div className="flex min-w-0 flex-col items-start justify-center">
+          <label className="cursor-pointer rounded-lg border border-slate-600 px-3 py-2 text-xs font-medium text-slate-200 transition hover:border-emerald-400">
+            Choose image
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              className="sr-only"
+              onChange={(event) => {
+                const selectedFile = event.currentTarget.files?.[0];
+                event.currentTarget.value = '';
+                selectImage(selectedFile);
+              }}
+            />
+          </label>
+          <p className="mt-2 max-w-full break-all text-xs font-medium text-white">{fileName}</p>
+          {imageDimensions && <p className="mt-1 text-[10px] text-slate-400">Image size: {imageDimensions} • Maximum 5 MB</p>}
+          <p className="mt-1 text-[10px] leading-4 text-slate-400">Use a clear, well-lit image with the whole person and PPE visible. The sample portrait cannot be scanned.</p>
+        </div>
+      </div>
+      {modelStatus && !modelStatus.configured && <p className="mt-3 rounded-lg border border-amber-400/25 bg-amber-500/5 p-2.5 text-xs leading-5 text-amber-100">{modelStatus.message} Set both variables in the server `.env` and restart the API to enable real model requests.</p>}
+      {statusError && <p role="alert" className="mt-3 rounded-lg border border-rose-400/30 bg-rose-500/5 p-2.5 text-xs leading-5 text-rose-200">{statusError}</p>}
+      <label className="mt-3 flex items-start gap-2 text-[10px] leading-4 text-slate-300">
+        <input type="checkbox" checked={imageConsent} onChange={(event) => setImageConsent(event.target.checked)} className="mt-0.5 accent-emerald-400" />
+        <span>I understand that running a live scan sends this image from the server to Roboflow for inference. Do not scan anyone without authorization and consent.</span>
+      </label>
+      <button type="button" onClick={() => void analyzeImage()} disabled={!file || !imageConsent || !modelStatus?.configured || isScanning} className="mt-3 rounded-lg bg-emerald-400 px-3 py-2 text-xs font-semibold text-slate-950 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-40">
+        {isScanning ? 'Analyzing with Roboflow…' : 'Analyze with Roboflow'}
+      </button>
+      {scanError && <p role="alert" className="mt-3 rounded-lg border border-rose-400/30 bg-rose-500/5 p-2.5 text-xs leading-5 text-rose-200">{scanError}</p>}
+      {scanResult && (
+        <div aria-live="polite" className="mt-3 rounded-lg border border-cyan-400/30 bg-cyan-500/5 p-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs font-semibold text-cyan-100">LIVE MODEL OUTPUT • {scanResult.provider}</p>
+            <span className="rounded-full border border-cyan-300/30 px-2 py-1 text-[9px] text-cyan-100">{scanResult.detections.length} detections</span>
+          </div>
+          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+            {scanResult.equipment.map((item) => (
+              <div key={item.name} className={`rounded-lg border p-2 ${item.status === 'DETECTED' ? 'border-emerald-400/25 bg-emerald-500/5' : 'border-slate-600 bg-slate-900/70'}`}>
+                <p className="text-[10px] capitalize text-slate-400">{item.name}</p>
+                <p className={`mt-1 text-xs font-semibold ${item.status === 'DETECTED' ? 'text-emerald-200' : 'text-slate-200'}`}>{item.status === 'DETECTED' ? `Detected • ${item.confidence}%` : 'No detection • Verify manually'}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-3">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-300">Model labels and confidence</p>
+            {scanResult.detections.length ? (
+              <ul className="mt-2 space-y-1">
+                {scanResult.detections.map((item, index) => <li key={`${item.label}-${index}`} className="flex justify-between gap-2 text-xs text-slate-200"><span className="break-all">{item.label}</span><span className="shrink-0">{item.confidence}%</span></li>)}
+              </ul>
+            ) : <p className="mt-2 text-xs text-slate-300">No objects were detected above the model's configured confidence threshold.</p>}
+          </div>
+          <p className="mt-3 border-t border-slate-700 pt-2 text-[10px] leading-4 text-slate-400">{scanResult.disclaimer}</p>
+        </div>
+      )}
+      <p className="mt-3 text-[10px] leading-4 text-slate-400">A model prediction is not a compliance decision. Images go to the configured Roboflow endpoint and are not retained by this application. Verify results with a trained supervisor and approved site procedures.</p>
+    </section>
   );
 }
 
@@ -494,11 +859,13 @@ function renderContent(
   setSelectedDetectionId: (id: string) => void,
   selectedMapSite: string,
   setSelectedMapSite: (name: string) => void,
-  setCreateDialog: (dialog: 'mine' | 'incident' | 'camera' | null) => void,
+  setCreateDialog: (dialog: 'mine' | 'incident' | 'camera' | 'worker' | null) => void,
   setActiveView: (view: string) => void,
   updateDashboard: (update: (current: DashboardData) => DashboardData) => void,
   exportReport: () => void,
   sessionName: string,
+  isAdmin: boolean,
+  apiToken: string,
 ) {
   const riskSummary = [
     { label: 'Low', value: dashboard.riskDistribution.low, color: '#22c55e' },
@@ -507,19 +874,43 @@ function renderContent(
     { label: 'Critical', value: dashboard.riskDistribution.critical, color: '#ef4444' },
   ];
 
-  const mapSites = [
-    { name: 'Korba North', id: 'mine-korba', risk: 'CRITICAL' },
-    { name: 'Singrauli Central', id: 'mine-singrauli', risk: 'HIGH' },
-    { name: 'Dhanbad East', id: 'mine-dhanbad', risk: 'MEDIUM' },
-    { name: 'Bokaro Open Cast', id: 'mine-bokaro', risk: 'HIGH' },
-    { name: 'Talcher South', id: 'mine-talcher', risk: 'LOW' },
-    { name: 'Neyveli West', id: 'mine-neyveli', risk: 'LOW' },
-  ];
+  const mapCoordinates: Record<string, { x: number; y: number }> = {
+    'mine-korba': { x: 25, y: 48 },
+    'mine-singrauli': { x: 47, y: 57 },
+    'mine-dhanbad': { x: 12, y: 49 },
+    'mine-bokaro': { x: 69, y: 32 },
+    'mine-talcher': { x: 71, y: 66 },
+    'mine-neyveli': { x: 45, y: 83 },
+  };
+  const mineMapArtwork: Record<string, { src: string; description: string }> = {
+    'mine-korba': { src: '/maps/mine-korba.svg', description: 'Terraced open pit, switchback haul roads, coal handling area and water reserve' },
+    'mine-singrauli': { src: '/maps/mine-singrauli.svg', description: 'Two open cuts, coal stockyard, haul routes and settling pond' },
+    'mine-dhanbad': { src: '/maps/mine-dhanbad.svg', description: 'Underground gallery network, mine shaft and ventilation facilities' },
+    'mine-bokaro': { src: '/maps/mine-bokaro.svg', description: 'Stepped open-cast benches, loading yard and conveyor line' },
+    'mine-talcher': { src: '/maps/mine-talcher.svg', description: 'Elongated strip-mining cut, coal handling and rail spur' },
+    'mine-neyveli': { src: '/maps/mine-neyveli.svg', description: 'Lignite benches, reclamation plots, power station and cooling ponds' },
+  };
+  const mapSites = dashboard.mines.map((mine, index) => ({
+    id: mine.id,
+    name: mine.name,
+    risk: mine.riskLevel,
+    ...(mapCoordinates[mine.id] ?? {
+      x: 15 + ((index * 17) % 70),
+      y: 18 + ((index * 23) % 65),
+    }),
+  }));
   const activeCamera = dashboard.vision.cameras.find((camera) => camera.id === selectedCameraId) ?? dashboard.vision.cameras[0];
   const activeCameraDetections = dashboard.vision.detections.filter((detection) => detection.cameraId === activeCamera?.id);
   const activeDetection = activeCameraDetections.find((detection) => detection.id === selectedDetectionId) ?? activeCameraDetections[0];
   const activeMine = dashboard.mines.find((mine) => mine.name === selectedMapSite) ?? dashboard.mines[0];
   const activeMapSite = mapSites.find((site) => site.name === selectedMapSite) ?? mapSites[0];
+  const activeMineMap = mineMapArtwork[activeMine?.id] ?? {
+    src: '/maps/mineguard-demo-map.svg',
+    description: `${activeMine?.type ?? 'Mine'} site layout with haul roads and operational areas`,
+  };
+  const mineWorkers = dashboard.workers.filter((worker) => worker.mine === activeMine?.id);
+  const mineAlerts = dashboard.alerts.filter((alert) => alert.status !== 'RESOLVED' && (alert.mine === activeMine?.id || alert.mine === activeMine?.name));
+  const mineIncidents = dashboard.incidents.filter((incident) => incident.mine === activeMine?.id || incident.mine === activeMine?.name);
   const ppeChecks = activeDetection
     ? [
         { label: 'Safety helmet', value: activeDetection.helmet },
@@ -530,6 +921,46 @@ function renderContent(
         { label: 'Safety boots', value: activeDetection.boots },
       ]
     : [];
+  const missingPpe = ppeChecks
+    .filter((check) => ['NO', 'MISSING', 'FALSE'].includes(String(check.value ?? '').toUpperCase()))
+    .map((check) => check.label.toLowerCase());
+  const safetyInstructions = !activeDetection
+    ? []
+    : activeDetection.unknownPerson
+      ? [
+          'Do not approach or confront the person alone; keep a safe distance.',
+          'Notify mine control or site security and follow the approved access-verification process.',
+          'Do not identify, discipline, or restrict anyone based only on this simulated face match.',
+        ]
+      : activeDetection.restrictedZone || activeDetection.status === 'RESTRICTED_ZONE'
+        ? [
+            'Do not proceed farther into the restricted area; use the marked safe exit only when it is safe to do so.',
+            'Notify mine control and the zone supervisor, then wait for explicit clearance before re-entry.',
+            'Keep clear of blasting or other active exclusion zones and follow the site emergency procedure.',
+            ...(missingPpe.length > 0 ? [`Do not resume work until required PPE is available and fitted: ${missingPpe.join(', ')}.`] : []),
+          ]
+        : missingPpe.length > 0
+          ? [
+              `Pause the task before entering the work area; missing or unconfirmed PPE: ${missingPpe.join(', ')}.`,
+              'Obtain the required correctly fitted PPE and have the supervisor verify it before work resumes.',
+              'If the required equipment is unavailable or damaged, remain in the designated safe area and report it.',
+            ]
+          : activeDetection.risk === 'HIGH' || activeDetection.risk === 'CRITICAL'
+            ? [
+                'Pause the activity and check the active zone hazards and current work authorization.',
+                'Move to the designated safe area only if the route is clear, then notify the supervisor.',
+                'Resume only after required controls and site-specific clearance are confirmed.',
+              ]
+            : [
+                'Keep the helmet and all task-required PPE correctly fitted while inside the operating area.',
+                'Stay within the authorized route and follow the site briefing and supervisor instructions.',
+                'Recheck PPE before starting a new task or entering a higher-risk zone.',
+              ];
+  const zoneSpecificInstruction = activeDetection?.zone.toLowerCase().includes('haul road')
+    ? 'Haul road reminder: stay outside vehicle exclusion lines and make eye contact with operators before crossing.'
+    : activeDetection?.zone.toLowerCase().includes('blasting')
+      ? 'Blasting-area reminder: remain outside the exclusion boundary until the authorized all-clear is issued.'
+      : null;
 
   switch (activeView) {
     case 'vision':
@@ -562,6 +993,9 @@ function renderContent(
                 <span className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-1 text-[10px] text-emerald-300">SIMULATED CAMERA FEED</span>
               </div>
               <div className="relative isolate mt-4 h-80 overflow-hidden rounded-2xl border border-slate-700 bg-[#29352e] shadow-inner shadow-slate-950/80">
+                {activeCamera?.id === 'CAM-001' ? (
+                  <img className="absolute inset-0 h-full w-full object-cover" src="/vision/main-entry-camera.svg" alt="Synthetic demo illustration of the main mine entrance, access gate, guard cabin, haul truck, and workers; not a real camera image." />
+                ) : (
                 <svg className="absolute inset-0 h-full w-full overflow-hidden" viewBox="0 0 960 420" preserveAspectRatio="xMidYMid slice" role="img" aria-label={`Simulated mine camera view at ${activeCamera?.zone ?? 'mine site'}`}>
                   <defs>
                     <linearGradient id="cameraSky" x1="0" x2="0" y1="0" y2="1"><stop stopColor="#71827b" /><stop offset="1" stopColor="#34443d" /></linearGradient>
@@ -584,24 +1018,81 @@ function renderContent(
                   </g>
                   <g stroke="#d2bd78" strokeWidth="3" opacity=".8"><path d="M20 265h160M215 265h115M652 265h104M818 265h122" /></g>
                   <g fill="#d2bd78"><path d="m178 260 10 5-10 5zM320 260l10 5-10 5zM746 260l10 5-10 5z" /></g>
-                  <g transform="translate(407 258)">
-                    <rect x="0" y="34" width="78" height="35" rx="6" fill="#c48b32" /><rect x="46" y="16" width="38" height="29" rx="5" fill="#e0a640" /><path d="M9 35 22 9h26l12 26z" fill="#e7b54b" /><rect x="53" y="21" width="21" height="14" fill="#293c3c" /><circle cx="19" cy="70" r="11" fill="#202522" /><circle cx="64" cy="70" r="11" fill="#202522" /><circle cx="19" cy="70" r="5" fill="#90958c" /><circle cx="64" cy="70" r="5" fill="#90958c" />
+                  <g transform="translate(322 214)">
+                    <ellipse cx="118" cy="142" rx="137" ry="15" fill="#101713" opacity=".58" />
+                    <path d="M13 43 42 6l132 14-13 83-148-13Z" fill="#e2a928" stroke="#513e20" strokeWidth="5" />
+                    <path d="m24 43 25-28 112 12-9 61-121-11Z" fill="#bb7d20" stroke="#f8d05b" strokeWidth="3" />
+                    <path d="m41 27 110 12m-120 2 120 12m-126 2 120 12" fill="none" stroke="#f3c64c" strokeWidth="3" opacity=".9" />
+                    <path d="M42 6 174 20 168 39 30 25Z" fill="#f0c13d" stroke="#fff0a1" strokeWidth="2" />
+                    <path d="m162 75 26 5 27 31-5 32h-42l-15-22Z" fill="#e8a624" stroke="#60471f" strokeWidth="4" />
+                    <path d="m178 86 20 5 17 21-33-2Z" fill="#243c3c" stroke="#d6d1b3" strokeWidth="3" />
+                    <path d="M187 91 197 94l10 13h-19Z" fill="#9fb2a5" opacity=".72" />
+                    <path d="m213 111 13 4v23h-16Z" fill="#d77a19" stroke="#62421b" strokeWidth="3" />
+                    <path d="M20 99h198v28H20z" fill="#414840" stroke="#252b26" strokeWidth="4" />
+                    <path d="M24 105h185" stroke="#edb534" strokeWidth="5" />
+                    <path d="M36 127h181" stroke="#202622" strokeWidth="7" />
+                    <g fill="#171c19" stroke="#81877c" strokeWidth="5">
+                      <circle cx="61" cy="131" r="25" /><circle cx="119" cy="131" r="25" /><circle cx="190" cy="131" r="25" />
+                    </g>
+                    <g fill="#c6c8b9" stroke="#4c534a" strokeWidth="3">
+                      <circle cx="61" cy="131" r="9" /><circle cx="119" cy="131" r="9" /><circle cx="190" cy="131" r="9" />
+                    </g>
+                    <g fill="#f4c84d">
+                      <circle cx="61" cy="131" r="3" /><circle cx="119" cy="131" r="3" /><circle cx="190" cy="131" r="3" />
+                    </g>
+                    <path d="M174 49v28m-8-3 25 5" stroke="#554529" strokeWidth="5" />
+                    <path d="M174 48v25m-7-2 23 5" stroke="#f0bd38" strokeWidth="3" />
+                    <rect x="202" y="117" width="10" height="7" rx="2" fill="#fff1a1" />
+                    <path d="M8 93h20" stroke="#fff0ae" strokeWidth="5" />
+                    <path d="m60 4 4-10h15l2 12" fill="#59635b" stroke="#29322c" strokeWidth="3" />
                   </g>
                   <g transform="translate(602 265)">
-                    <circle cx="14" cy="7" r="7" fill="#d5b495" /><path d="M7 15h15l5 38H2z" fill="#d99028" /><path d="M8 18h12M5 30h18" stroke="#f2d26c" strokeWidth="4" /><path d="M7 52 4 73m12-21 5 21" stroke="#202622" strokeWidth="6" /><path d="M6 3h16l-3-6H9z" fill="#ebbc40" />
+                    <circle cx="14" cy="7" r="7" fill="#d5b495" /><path d="M7 15h15l5 38H2z" fill="#d99028" /><path d="M8 18h12M5 30h18" stroke="#f2d26c" strokeWidth="4" /><path d="M7 52 4 73m12-21 5 21" stroke="#202622" strokeWidth="6" />
+                    <path d="M5 5Q6-5 14-5T23 5l3 2H2z" fill="#f2c744" stroke="#9d6b1d" strokeWidth="1.5" /><path d="M4 5h20" stroke="#fff0a2" strokeWidth="2" /><path d="M14-4v8" stroke="#ffe68a" strokeWidth="1.5" /><path d="M4 7 7 14m17-7-3 7" fill="none" stroke="#e7dfc8" strokeWidth="1.2" /><path d="M8-1q6-5 12 0" fill="none" stroke="#fff4bf" strokeWidth="1" />
+                  </g>
+                  <g transform="translate(278 271) scale(.82)">
+                    <circle cx="14" cy="7" r="7" fill="#c89f7d" /><path d="M7 15h15l5 38H2z" fill="#df8b26" /><path d="M7 52 4 73m12-21 5 21" stroke="#202622" strokeWidth="6" />
+                    <path d="M5 5Q6-5 14-5T23 5l3 2H2z" fill="#f2c744" stroke="#9d6b1d" strokeWidth="1.5" /><path d="M4 5h20" stroke="#fff0a2" strokeWidth="2" /><path d="M14-4v8" stroke="#ffe68a" strokeWidth="1.5" /><path d="M4 7 7 14m17-7-3 7" fill="none" stroke="#e7dfc8" strokeWidth="1.2" /><path d="M8-1q6-5 12 0" fill="none" stroke="#fff4bf" strokeWidth="1" />
+                  </g>
+                  <g transform="translate(530 275) scale(.72)">
+                    <circle cx="14" cy="7" r="7" fill="#d5b495" /><path d="M7 15h15l5 38H2z" fill="#c77822" /><path d="M7 52 4 73m12-21 5 21" stroke="#202622" strokeWidth="6" />
+                    <path d="M5 5Q6-5 14-5T23 5l3 2H2z" fill="#f2c744" stroke="#9d6b1d" strokeWidth="1.5" /><path d="M4 5h20" stroke="#fff0a2" strokeWidth="2" /><path d="M14-4v8" stroke="#ffe68a" strokeWidth="1.5" /><path d="M4 7 7 14m17-7-3 7" fill="none" stroke="#e7dfc8" strokeWidth="1.2" /><path d="M8-1q6-5 12 0" fill="none" stroke="#fff4bf" strokeWidth="1" />
+                  </g>
+                  <g transform="translate(715 276) scale(.65)">
+                    <circle cx="14" cy="7" r="7" fill="#bd9272" /><path d="M7 15h15l5 38H2z" fill="#d89028" /><path d="M7 52 4 73m12-21 5 21" stroke="#202622" strokeWidth="6" />
+                    <path d="M5 5Q6-5 14-5T23 5l3 2H2z" fill="#f2c744" stroke="#9d6b1d" strokeWidth="1.5" /><path d="M4 5h20" stroke="#fff0a2" strokeWidth="2" /><path d="M14-4v8" stroke="#ffe68a" strokeWidth="1.5" /><path d="M4 7 7 14m17-7-3 7" fill="none" stroke="#e7dfc8" strokeWidth="1.2" /><path d="M8-1q6-5 12 0" fill="none" stroke="#fff4bf" strokeWidth="1" />
                   </g>
                   <rect width="960" height="420" fill="url(#cameraNoise)" opacity=".42" />
                   <path d="M0 0h960v420H0z" fill="none" stroke="#d4dfd4" strokeOpacity=".16" strokeWidth="18" />
                   <path d="M14 14h35M14 14v25M946 14h-35M946 14v25M14 406h35M14 406v-25M946 406h-35M946 406v-25" fill="none" stroke="#d9e4db" strokeOpacity=".65" strokeWidth="2" />
                 </svg>
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-slate-950/20" />
-                {activeDetection && <div className={`absolute left-[61%] top-[53%] h-[28%] w-[6%] rounded-md border-2 ${activeDetection.risk === 'CRITICAL' || activeDetection.risk === 'HIGH' ? 'border-amber-400/90' : 'border-emerald-400/90'}`}>
-                  <span className={`absolute -top-6 left-0 whitespace-nowrap rounded px-1.5 py-1 text-[9px] font-semibold text-slate-950 ${activeDetection.risk === 'CRITICAL' || activeDetection.risk === 'HIGH' ? 'bg-amber-400/90' : 'bg-emerald-400/90'}`}>{activeDetection.unknownPerson ? 'UNKNOWN PERSON' : `${activeDetection.workerId} • DEMO SCAN`}</span>
-                </div>}
-                {activeDetection && <div className="pointer-events-none absolute inset-x-0 top-[62%] h-0.5 animate-pulse bg-cyan-300/80 shadow-[0_0_12px_rgba(103,232,249,0.9)]" />}
+                {activeCameraDetections.slice(0, 4).map((detection, index) => {
+                  const positions = [
+                    { left: '29%', top: '62%', height: '21%', width: '4%' },
+                    { left: '55%', top: '62%', height: '21%', width: '4%' },
+                    { left: '63%', top: '60%', height: '23%', width: '4%' },
+                    { left: '75%', top: '61%', height: '22%', width: '4%' },
+                  ];
+                  const isSelected = activeDetection?.id === detection.id;
+                  const isHighRisk = detection.risk === 'CRITICAL' || detection.risk === 'HIGH';
+                  return <button
+                    key={detection.id}
+                    type="button"
+                    aria-label={`Select ${detection.unknownPerson ? 'unknown person' : detection.workerName}, demo detected`}
+                    aria-pressed={isSelected}
+                    onClick={() => setSelectedDetectionId(detection.id)}
+                    style={positions[index]}
+                    className={`absolute z-10 rounded-md border-2 bg-transparent transition ${isSelected ? 'border-cyan-300 shadow-[0_0_12px_rgba(103,232,249,0.7)]' : isHighRisk ? 'border-amber-400/90' : 'border-emerald-400/90'}`}
+                  >
+                    <span className={`absolute -top-6 left-0 whitespace-nowrap rounded px-1.5 py-1 text-[8px] font-semibold text-slate-950 ${isSelected ? 'bg-cyan-300' : isHighRisk ? 'bg-amber-400/90' : 'bg-emerald-400/90'}`}>{detection.unknownPerson ? 'UNKNOWN' : detection.workerId}</span>
+                  </button>;
+                })}
+                {activeDetection && <div className="pointer-events-none absolute inset-x-0 top-[62%] h-0.5 animate-pulse bg-cyan-300/70 shadow-[0_0_12px_rgba(103,232,249,0.8)]" />}
                 <div className="absolute left-4 top-4 rounded-full border border-amber-300/40 bg-slate-950/75 px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.16em] text-amber-200">SIMULATED CAMERA FEED</div>
                 <div className="absolute right-4 top-4 flex items-center gap-2 rounded-full border border-emerald-300/30 bg-slate-950/75 px-2 py-1 text-[9px] font-medium text-emerald-200"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />DEMO MODE</div>
-                <div className="absolute left-4 top-14 rounded bg-slate-950/60 px-2 py-1 font-mono text-[9px] text-slate-200">{activeCamera?.id ?? 'CAM-001'} • {activeCamera?.zone ?? 'Zone A'}</div>
+                <div className="absolute left-4 top-14 rounded bg-slate-950/70 px-2 py-1 font-mono text-[9px] text-slate-200">{activeCamera?.id ?? 'CAM-001'} • {activeCamera?.zone ?? 'Zone A'} • {activeCameraDetections.length} DEMO PERSONS</div>
                 <div className="absolute inset-x-0 bottom-0 flex items-end justify-between p-4">
                   <div className="rounded-xl border border-slate-700 bg-slate-900/80 p-3 text-xs text-slate-200 backdrop-blur-sm">
                     <p className="font-medium text-white">{activeCamera?.zone ?? 'Zone A - Main Entry'}</p>
@@ -621,10 +1112,12 @@ function renderContent(
               <div className="flex items-center justify-between gap-2">
                 <div>
                   <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Person PPE Scan</p>
-                  <p className="mt-1 text-[10px] text-amber-300">DEMO RESULTS • Not a live camera or AI scan</p>
+                  <p className="mt-1 text-[10px] text-cyan-200">Roboflow hosted model • only analyzed when configured and consented</p>
                 </div>
                 {activeDetection && <span className={`rounded-full border px-2 py-1 text-[10px] ${riskTone(activeDetection.risk)}`}>{activeDetection.risk} RISK</span>}
               </div>
+              <RoboflowImageScanner token={apiToken} />
+              <LiveWebcamDemo />
               {activeCameraDetections.length ? (
                 <>
                   <div className="mt-3 space-y-2">
@@ -648,12 +1141,34 @@ function renderContent(
                       <div className="mt-3 grid grid-cols-2 gap-2">
                         {ppeChecks.map((check) => {
                           const detected = ['YES', 'DETECTED', 'COMPLIANT'].includes(String(check.value ?? '').toUpperCase());
-                          return <div key={check.label} className={`rounded-lg border px-2.5 py-2 ${detected ? 'border-emerald-500/25 bg-emerald-500/5' : 'border-rose-500/25 bg-rose-500/5'}`}>
+                          const unknown = ['UNKNOWN', 'NOT RECORDED', 'N/A'].includes(String(check.value ?? '').toUpperCase());
+                          return <div key={check.label} className={`rounded-lg border px-2.5 py-2 ${detected ? 'border-emerald-500/25 bg-emerald-500/5' : unknown ? 'border-slate-600 bg-slate-800/40' : 'border-rose-500/25 bg-rose-500/5'}`}>
                             <p className="text-[10px] text-slate-400">{check.label}</p>
-                            <p className={`mt-0.5 text-xs font-semibold ${detected ? 'text-emerald-300' : 'text-rose-300'}`}>{detected ? '✓ Detected' : check.value ? '✕ Missing' : '— Not recorded'}</p>
+                            <p className={`mt-0.5 text-xs font-semibold ${detected ? 'text-emerald-300' : unknown ? 'text-slate-300' : 'text-rose-300'}`}>{detected ? '✓ Detected' : unknown ? '— Unknown / not assessed' : check.value ? '✕ Missing' : '— Not recorded'}</p>
                           </div>;
                         })}
                       </div>
+                      <section aria-live="polite" aria-labelledby="person-safety-instructions" className={`mt-4 rounded-xl border p-3 ${activeDetection.unknownPerson || activeDetection.restrictedZone || missingPpe.length > 0 || activeDetection.risk === 'HIGH' || activeDetection.risk === 'CRITICAL' ? 'border-amber-400/30 bg-amber-500/5' : 'border-emerald-400/25 bg-emerald-500/5'}`}>
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <div>
+                            <p className="text-[10px] uppercase tracking-[0.16em] text-slate-400">Selected person safety plan</p>
+                            <h5 id="person-safety-instructions" className="mt-1 text-sm font-semibold text-white">{activeDetection.unknownPerson ? 'Access verification required' : activeDetection.restrictedZone ? 'Restricted-zone response' : missingPpe.length > 0 ? 'PPE corrective steps' : activeDetection.risk === 'HIGH' || activeDetection.risk === 'CRITICAL' ? 'High-risk response' : 'Safe-work reminders'}</h5>
+                          </div>
+                          <span className="rounded-full border border-amber-300/30 bg-slate-950/50 px-2 py-1 text-[9px] font-semibold tracking-wide text-amber-200">SIMULATED GUIDANCE</span>
+                        </div>
+                        <ol className="mt-3 space-y-2">
+                          {safetyInstructions.map((instruction, index) => (
+                            <li key={instruction} className="flex gap-2 text-xs leading-5 text-slate-200">
+                              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-800 text-[10px] font-semibold text-emerald-200">{index + 1}</span>
+                              <span>{instruction}</span>
+                            </li>
+                          ))}
+                          {zoneSpecificInstruction && (
+                            <li className="rounded-lg border border-slate-700 bg-slate-900/70 p-2 text-xs leading-5 text-slate-200">{zoneSpecificInstruction}</li>
+                          )}
+                        </ol>
+                        <p className="mt-3 border-t border-slate-700 pt-2 text-[10px] leading-4 text-slate-400">Demo-only recommendation based on simulated detection data. Follow approved mine SOPs, emergency procedures, and supervisor direction; camera output is not a disciplinary or emergency decision.</p>
+                      </section>
                     </div>
                   )}
                 </>
@@ -848,7 +1363,7 @@ function renderContent(
               <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Mine Site Map</p>
-                  <h3 className="mt-1 text-lg font-semibold text-white">Illustrative demo map</h3>
+                  <h3 className="mt-1 text-lg font-semibold text-white">Individual mine map illustrations</h3>
                 </div>
                 <label className="text-xs text-slate-400">
                   Select mine location
@@ -857,8 +1372,22 @@ function renderContent(
                   </select>
                 </label>
               </div>
-              <div className="relative mt-4 h-64 overflow-hidden rounded-2xl border border-slate-700 bg-slate-900 sm:h-[22rem]">
-                <img src="/maps/mineguard-demo-map.svg" alt="Illustrative, synthetic open-pit mine map with haul roads, processing plant, water reserve and terrain contours" className="h-full w-full object-cover" />
+              <div className="relative mt-4 aspect-[2/1] overflow-hidden rounded-2xl border border-slate-700 bg-slate-900">
+                <img key={activeMineMap.src} src={activeMineMap.src} alt={`Synthetic demo map for ${activeMine?.name ?? 'selected mine'}: ${activeMineMap.description}. Not to scale.`} className="absolute inset-0 h-full w-full object-fill transition-opacity duration-300" />
+                {mapSites.map((site, index) => (
+                  <button
+                    key={site.id}
+                    type="button"
+                    title={`Select ${site.name} — ${site.risk} risk`}
+                    aria-label={`Select ${site.name}, ${site.risk} risk`}
+                    aria-pressed={selectedMapSite === site.name}
+                    onClick={() => setSelectedMapSite(site.name)}
+                    style={{ left: `${site.x}%`, top: `${site.y}%` }}
+                    className={`absolute z-10 flex h-8 min-w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 px-1.5 text-[10px] font-bold shadow-lg transition hover:z-20 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-slate-900 ${selectedMapSite === site.name ? 'scale-110 border-white bg-emerald-400 text-slate-950 ring-2 ring-emerald-300/60' : `${site.risk === 'CRITICAL' ? 'border-red-100 bg-red-500 text-white' : site.risk === 'HIGH' ? 'border-orange-100 bg-orange-500 text-white' : site.risk === 'MEDIUM' ? 'border-yellow-100 bg-yellow-400 text-slate-950' : 'border-emerald-100 bg-emerald-500 text-slate-950'}`}`}
+                  >
+                    {String(index + 1).padStart(2, '0')}
+                  </button>
+                ))}
                 <div className="absolute left-3 top-3 flex items-center gap-2 rounded-lg border border-white/20 bg-slate-950/80 px-3 py-2 shadow-lg backdrop-blur-sm">
                   <span className={`h-2.5 w-2.5 rounded-full ${activeMapSite?.risk === 'CRITICAL' ? 'bg-red-400' : activeMapSite?.risk === 'HIGH' ? 'bg-orange-400' : activeMapSite?.risk === 'MEDIUM' ? 'bg-yellow-400' : 'bg-emerald-400'}`} />
                   <span className="text-xs font-semibold text-white">{activeMine?.name ?? selectedMapSite}</span>
@@ -866,8 +1395,8 @@ function renderContent(
                 <span className="absolute right-3 top-3 rounded-lg border border-amber-200/30 bg-slate-950/80 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-amber-100 shadow-lg backdrop-blur-sm">DEMO MAP • NOT TO SCALE</span>
                 <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 bg-gradient-to-t from-slate-950/95 via-slate-950/55 to-transparent p-3 pt-12 sm:p-4 sm:pt-14">
                   <div>
-                    <p className="text-sm font-semibold text-white">Illustrative open-pit mine layout</p>
-                    <p className="mt-1 text-[10px] text-slate-200 sm:text-xs">Original local artwork • no external map requests</p>
+                    <p className="text-sm font-semibold text-white">{activeMine?.name ?? 'Mine'} • {activeMineMap.description}</p>
+                    <p className="mt-1 text-[10px] text-slate-200 sm:text-xs">Original synthetic local artwork • no external map requests</p>
                   </div>
                   <div className="hidden rounded-lg border border-white/15 bg-slate-950/75 px-3 py-2 text-[10px] text-slate-200 sm:block">
                     <p><span className="text-amber-200">—</span> Haul road</p>
@@ -875,12 +1404,22 @@ function renderContent(
                   </div>
                 </div>
               </div>
-              <div className="mt-3 flex flex-col gap-2 text-xs text-slate-300 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <p className="font-medium text-white">{activeMine?.name ?? 'Selected mine'} • {activeMine?.location ?? 'Location unavailable'}</p>
-                  <p className="mt-1">Risk {activeMine?.riskScore ?? '—'}/100 • {activeMine?.riskLevel ?? '—'} • {activeMine?.workerCount ?? '—'} workers</p>
+              <div aria-live="polite" className="mt-3 rounded-xl border border-slate-700 bg-slate-950/70 p-4">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-slate-400">Selected mine • {activeMine?.mineId ?? '—'}</p>
+                    <p className="mt-1 font-semibold text-white">{activeMine?.name ?? 'Select a mine'} <span className="font-normal text-slate-400">• {activeMine?.location ?? 'Location unavailable'}</span></p>
+                    <p className="mt-1 text-xs text-slate-400">{activeMine?.type ?? 'Mine'} • {activeMine?.status ?? 'Status unavailable'}</p>
+                  </div>
+                  <button type="button" onClick={() => setActiveView('mines')} className="rounded-lg border border-emerald-400/40 px-3 py-2 text-xs font-medium text-emerald-200 transition hover:bg-emerald-500/10">View mine portfolio</button>
                 </div>
-                <p className="max-w-sm text-slate-400">This synthetic illustration is not a real mine map, surveyed boundary, navigation tool, or operational safety source.</p>
+                <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  <div className="rounded-lg border border-slate-700 bg-slate-900/80 p-3"><p className="text-[10px] uppercase text-slate-400">Risk score</p><p className="mt-1 font-semibold text-white">{activeMine?.riskScore ?? '—'} <span className="text-xs text-slate-400">/100</span></p><span className={`mt-1 inline-block rounded-full border px-2 py-0.5 text-[10px] ${riskTone(activeMine?.riskLevel ?? 'LOW')}`}>{activeMine?.riskLevel ?? '—'}</span></div>
+                  <div className="rounded-lg border border-slate-700 bg-slate-900/80 p-3"><p className="text-[10px] uppercase text-slate-400">Workers</p><p className="mt-1 font-semibold text-white">{mineWorkers.length}<span className="ml-1 text-xs font-normal text-slate-400">tracked</span></p><p className="mt-1 text-[10px] text-slate-400">{activeMine?.workerCount ?? 0} assigned at mine</p></div>
+                  <div className="rounded-lg border border-slate-700 bg-slate-900/80 p-3"><p className="text-[10px] uppercase text-slate-400">Open alerts</p><p className="mt-1 font-semibold text-white">{mineAlerts.length}</p><p className="mt-1 text-[10px] text-slate-400">Requiring attention</p></div>
+                  <div className="rounded-lg border border-slate-700 bg-slate-900/80 p-3"><p className="text-[10px] uppercase text-slate-400">Compliance</p><p className="mt-1 font-semibold text-white">{activeMine?.compliance ?? '—'}%</p><p className="mt-1 text-[10px] text-slate-400">{mineIncidents.length} incident records</p></div>
+                </div>
+                <p className="mt-3 text-[10px] leading-5 text-slate-400">Select a numbered marker, mine button, or dropdown to switch this mine's illustration and site snapshot. Every illustration is synthetic, not to scale, and not a surveyed operational map.</p>
               </div>
               <div className="mt-3 flex min-w-0 max-w-full gap-2 overflow-x-auto pb-1">
                 {mapSites.map((site) => (
@@ -1014,14 +1553,20 @@ function renderContent(
     case 'workers':
       return (
         <div className="panel p-5">
-          <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Worker Safety</p>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Worker Safety</p>
+              <p className="mt-1 text-xs text-slate-400">{dashboard.workers.length} employees in the roster</p>
+            </div>
+            {isAdmin && <button type="button" onClick={() => setCreateDialog('worker')} className="rounded-xl bg-emerald-500 px-3 py-2 text-sm font-medium text-slate-950 transition hover:bg-emerald-400">Add Employee</button>}
+          </div>
           <div className="mt-4 overflow-x-auto">
             <table className="min-w-full text-left text-sm">
               <thead className="border-b border-slate-700 text-slate-300"><tr><th className="px-3 py-3">Worker</th><th className="px-3 py-3">Mine</th><th className="px-3 py-3">Zone</th><th className="px-3 py-3">PPE</th><th className="px-3 py-3">Status</th></tr></thead>
               <tbody>
                 {dashboard.workers.map((worker) => (
                   <tr key={worker.id} className="border-b border-slate-800 last:border-0">
-                    <td className="px-3 py-3 text-white">{worker.name}</td>
+                    <td className="px-3 py-3 text-white">{worker.name}<span className="mt-1 block text-xs text-slate-400">{worker.workerId} • {worker.role} • {worker.department}</span></td>
                     <td className="px-3 py-3 text-slate-300">{dashboard.mines.find((mine) => mine.id === worker.mine)?.name || worker.mine}</td>
                     <td className="px-3 py-3 text-slate-300">{worker.zone}</td>
                     <td className="px-3 py-3 text-slate-300">{worker.ppeStatus}</td>

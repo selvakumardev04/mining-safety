@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="720" viewBox="0 0 1440 720" role="img" aria-labelledby="title desc">
+  <title id="title">Synthetic Talcher South mine map</title>
+  <desc id="desc">Original illustrative demo map with elongated strip-mining cuts, coal conveyor corridors, a rail spur and settling ponds. Not a surveyed mine map.</desc>
+  <defs><linearGradient id="land" x2="0" y2="1"><stop stop-color="#8e947b"/><stop offset="1" stop-color="#43584c"/></linearGradient><pattern id="grain" width="40" height="40" patternUnits="userSpaceOnUse"><circle cx="8" cy="12" r="1.4" fill="#fff0cf" opacity=".2"/><path d="M24 30l8-3" stroke="#213a2f" stroke-opacity=".3" stroke-width="3"/></pattern></defs>
+  <rect width="1440" height="720" fill="url(#land)"/><rect width="1440" height="720" fill="url(#grain)"/>
+  <path d="M1100 0q-60 110 20 210t-10 190 30 170-30 150h330V0Z" fill="#315e5b"/><path d="M1190 0q-35 110 30 210t-10 190 30 170-15 150" fill="none" stroke="#65a9a0" stroke-width="52" opacity=".85"/>
+  <path d="M100 175q140-90 290 0t290 0 290 0M40 560q190-90 370 0t350 0 350 0" fill="none" stroke="#e1d7b4" stroke-width="3" opacity=".42"/>
+  <path d="M160 245q240-110 490-30t300 170-275 165-470 5-45-310Z" fill="#695b43" stroke="#ccb587" stroke-width="8"/>
+  <path d="M190 280q210-85 415-20t245 130-230 125-390 0-40-235Z" fill="none" stroke="#e2ca98" stroke-width="12"/>
+  <path d="M235 315q170-60 330-10t190 95-180 90-310-5-30-170Z" fill="none" stroke="#f0d9a7" stroke-width="10"/>
+  <path d="M0 425q220-80 360-15t320 0 260 80 300-45" fill="none" stroke="#ab9367" stroke-width="23"/><path d="M0 425q220-80 360-15t320 0 260 80 300-45" fill="none" stroke="#eee0b7" stroke-width="2" stroke-dasharray="12 17"/>
+  <g fill="#69766a" stroke="#d5d2b9" stroke-width="4"><path d="M760 120h140v90H760zM910 150h95v60h-95zM730 95h100v25H730z"/><path d="M780 145v50m40-50v50m40-50v50"/></g>
+  <path d="M180 610h780" stroke="#44483e" stroke-width="13"/><path d="M180 610h780" stroke="#e0d2a9" stroke-width="2" stroke-dasharray="14 15"/>
+  <g fill="#f4efd8" font-family="Arial,sans-serif" font-weight="700" letter-spacing="3"><text x="230" y="520" font-size="22">TALCHER SOUTH • STRIP CUT</text><text x="750" y="245" font-size="16">COAL HANDLING</text><text x="355" y="655" font-size="15">RAIL SPUR</text></g>
+</svg>

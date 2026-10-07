@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="720" viewBox="0 0 1440 720" role="img" aria-labelledby="title desc">
+  <title id="title">Synthetic Dhanbad East underground mine map</title>
+  <desc id="desc">Original illustrative mine map showing a surface shaft, underground gallery network, ventilation buildings and safety zones. Not a surveyed mine map.</desc>
+  <defs><linearGradient id="land" x2="0" y2="1"><stop stop-color="#77856d"/><stop offset="1" stop-color="#344c43"/></linearGradient><radialGradient id="glow"><stop stop-color="#d3a660" stop-opacity=".34"/><stop offset="1" stop-color="#d3a660" stop-opacity="0"/></radialGradient></defs>
+  <rect width="1440" height="720" fill="url(#land)"/><path d="M0 140q170-100 360 0t360 0 360 0 360-30M0 590q190-100 380 0t380 0 380 0 300-30" fill="none" stroke="#d4d1ac" stroke-width="3" opacity=".4"/>
+  <path d="M140 90h1160v550H140z" fill="#162c2a" opacity=".35" stroke="#b6c3a1" stroke-dasharray="14 12" stroke-width="3"/>
+  <ellipse cx="720" cy="395" rx="570" ry="290" fill="url(#glow)"/>
+  <g fill="none" stroke-linecap="round"><path d="M720 245v130m0 0-210 70m210-70 230 65m-230-65-30 175m30-175 280-140M720 375 475 270m245 105 370 130M510 445l-90 100m90-100 80 115m190-15 115 45m-115-45-15 80m245-210 115-80" stroke="#d5ab68" stroke-width="17"/><path d="M720 245v130m0 0-210 70m210-70 230 65m-230-65-30 175m30-175 280-140M720 375 475 270m245 105 370 130M510 445l-90 100m90-100 80 115m190-15 115 45m-115-45-15 80m245-210 115-80" stroke="#f0d8a4" stroke-width="2" stroke-dasharray="10 14"/></g>
+  <g fill="#37483e" stroke="#d4d2b5" stroke-width="4"><path d="M625 110h190v105H625zM650 215h140v65H650z"/><path d="M580 85h280v25H580zM668 135v65m45-65v65m45-65v65"/></g>
+  <circle cx="720" cy="377" r="34" fill="#e5ac4b" stroke="#fff0c9" stroke-width="6"/><circle cx="720" cy="377" r="8" fill="#263d35"/>
+  <g fill="#f4efd8" font-family="Arial,sans-serif" font-weight="700" letter-spacing="3"><text x="555" y="70" font-size="20">DHANBAD EAST • SHAFT</text><text x="222" y="280" font-size="15">VENTILATION</text><text x="940" y="600" font-size="15">UNDERGROUND GALLERIES • DEMO</text></g>
+  <g fill="#31463a"><path d="m90 200 26-56 26 56h-12v31h-28v-31zM1270 210l24-50 24 50h-12v28h-24v-28zM130 525l23-49 23 49h-11v28h-24v-28z"/></g>
+</svg>

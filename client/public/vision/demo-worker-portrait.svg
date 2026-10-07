@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="600" viewBox="0 0 480 600" role="img" aria-labelledby="title desc">
+  <title id="title">Illustrative MineGuard demo worker portrait</title>
+  <desc id="desc">Original synthetic illustration of a mine worker wearing a yellow safety helmet and high-visibility vest. Not a photograph of a real person.</desc>
+  <defs>
+    <linearGradient id="wall" x2="0" y2="1"><stop stop-color="#465d53"/><stop offset="1" stop-color="#172821"/></linearGradient>
+    <linearGradient id="vest" x2="0" y2="1"><stop stop-color="#f4b72f"/><stop offset="1" stop-color="#d77b1e"/></linearGradient>
+    <linearGradient id="helmet" x2="0" y2="1"><stop stop-color="#ffe36a"/><stop offset="1" stop-color="#dca51e"/></linearGradient>
+    <radialGradient id="light"><stop stop-color="#e5c775" stop-opacity=".24"/><stop offset="1" stop-color="#e5c775" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="480" height="600" fill="url(#wall)"/>
+  <circle cx="235" cy="220" r="260" fill="url(#light)"/>
+  <path d="M0 490 75 415l48 37 72-91 70 75 70-116 65 73 80-75v282H0Z" fill="#253b31" opacity=".8"/>
+  <path d="M0 535h480v65H0z" fill="#101c17" opacity=".55"/>
+  <path d="M98 600q10-120 78-157l61-28 66 28q70 38 81 157Z" fill="url(#vest)" stroke="#4a3821" stroke-width="5"/>
+  <path d="m171 452 66 148m62-148-61 148" fill="none" stroke="#f8e9b4" stroke-width="18"/>
+  <path d="M191 414h92v74q-45 35-92 0z" fill="#bd8c68"/>
+  <ellipse cx="237" cy="303" rx="91" ry="116" fill="#bd8c68"/>
+  <path d="M149 306q3-93 88-105 78 12 89 99-29-30-38-68-54 53-139 48Z" fill="#26251f"/>
+  <path d="M166 267q0-89 72-106 82 1 85 106l-18 9q-9-45-30-59-48 37-109 37Z" fill="url(#helmet)" stroke="#8c681c" stroke-width="6"/>
+  <path d="M159 266q78 14 170-1 19 2 25 15-5 12-25 12H163q-17-2-21-12 2-11 17-14Z" fill="#e6ae2c" stroke="#8c681c" stroke-width="5"/>
+  <path d="M183 255q12-10 28-2m54 0q16-8 29 2" fill="none" stroke="#3c3027" stroke-width="7" stroke-linecap="round"/>
+  <ellipse cx="208" cy="279" rx="5" ry="7" fill="#292720"/><ellipse cx="276" cy="279" rx="5" ry="7" fill="#292720"/>
+  <path d="M228 289q-9 24 2 30h18m-42 29q32 21 66-1" fill="none" stroke="#714b37" stroke-width="5" stroke-linecap="round"/>
+  <path d="M167 287q-5 54 20 82m121-81q4 52-18 81" fill="none" stroke="#eadfc1" stroke-width="4"/>
+  <rect x="20" y="20" width="440" height="560" rx="16" fill="none" stroke="#c2d1bd" stroke-opacity=".34" stroke-width="3"/>
+  <g fill="#f2eccf" font-family="Arial,sans-serif" font-weight="700" letter-spacing="2">
+    <text x="32" y="548" font-size="16">SYNTHETIC DEMO PORTRAIT</text>
+    <text x="32" y="572" font-size="11" opacity=".75">NOT A REAL PERSON • NOT A PHOTO</text>
+  </g>
+</svg>

@@ -1,0 +1,146 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 840" role="img" aria-labelledby="title desc">
+  <title id="title">Illustrated mine-site main entrance camera scene</title>
+  <desc id="desc">A synthetic demo illustration of an access gate, guard cabin, haul truck and mine workers. Not a real camera image.</desc>
+  <defs>
+    <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#9fc1c2"/><stop offset=".55" stop-color="#d4d3b8"/><stop offset="1" stop-color="#e8bd79"/></linearGradient>
+    <linearGradient id="ridge" x2="0" y2="1"><stop stop-color="#697d6b"/><stop offset="1" stop-color="#374c3e"/></linearGradient>
+    <linearGradient id="earth" x2="0" y2="1"><stop stop-color="#77765c"/><stop offset=".45" stop-color="#545744"/><stop offset="1" stop-color="#292e28"/></linearGradient>
+    <linearGradient id="road" x2=".25" y2="1"><stop stop-color="#777767"/><stop offset="1" stop-color="#3d403a"/></linearGradient>
+    <linearGradient id="truckPaint" x2="0" y2="1"><stop stop-color="#ffc940"/><stop offset=".58" stop-color="#e3941c"/><stop offset="1" stop-color="#a65a16"/></linearGradient>
+    <linearGradient id="glass" x2="1" y2="1"><stop stop-color="#a9c1b8"/><stop offset="1" stop-color="#344b4c"/></linearGradient>
+    <linearGradient id="boothGlass" x2="0" y2="1"><stop stop-color="#a9c4bf"/><stop offset="1" stop-color="#45605c"/></linearGradient>
+    <radialGradient id="sunGlow"><stop stop-color="#fff3cf" stop-opacity=".8"/><stop offset="1" stop-color="#fff3cf" stop-opacity="0"/></radialGradient>
+    <pattern id="grain" width="7" height="7" patternUnits="userSpaceOnUse"><circle cx="1" cy="2" r=".7" fill="#fff" opacity=".18"/><circle cx="5" cy="6" r=".6" fill="#101713" opacity=".13"/></pattern>
+    <pattern id="hatch" width="20" height="20" patternTransform="rotate(45)" patternUnits="userSpaceOnUse"><rect width="10" height="20" fill="#e8b94b"/><rect x="10" width="10" height="20" fill="#26352f"/></pattern>
+    <filter id="softShadow" x="-30%" y="-30%" width="160%" height="180%"><feGaussianBlur stdDeviation="12"/></filter>
+  </defs>
+
+  <rect width="1920" height="840" fill="url(#sky)"/>
+  <circle cx="1515" cy="165" r="230" fill="url(#sunGlow)"/>
+  <path d="M0 337 102 266l84 31 141-120 116 108 91-62 127 112 136-126 123 82 133-121 101 90 123-52 119 89 128-104 176 110v190H0Z" fill="#899581" opacity=".8"/>
+  <path d="m0 408 138-96 88 38 123-112 123 134 115-90 104 75 120-127 102 102 99-70 121 80 103-95 95 76 128-53 119 98 162-92v177H0Z" fill="url(#ridge)"/>
+  <path d="M0 419q132-47 257 1t245-4q136-42 277 7t270-8q145-38 284 9t281-4q161-38 306 10v410H0Z" fill="url(#earth)"/>
+  <g fill="#a69a6e" opacity=".7">
+    <path d="m28 432 102-52 88 31 94-41 51 32-9 29H28z"/><path d="m1391 431 110-47 61 24 106-33 101 53h-378z"/>
+    <path d="m213 489 67-26 75 28 110-35 40 24-16 25H213z"/><path d="m1489 493 76-30 108 34 112-29 70 37h-366z"/>
+  </g>
+  <g stroke="#c4b17a" stroke-width="5" opacity=".42">
+    <path d="M16 459h320M0 478h279M1511 462h363M1608 484h312"/>
+  </g>
+
+  <path d="M667 840 820 341h281l227 499Z" fill="url(#road)"/>
+  <path d="m937 840 66-499h31l111 499Z" fill="#d2bd86" opacity=".42"/>
+  <path d="M719 662 1200 662M690 713 1241 713M663 767 1286 767" stroke="#c9c3a5" stroke-width="5" stroke-dasharray="46 35" opacity=".45"/>
+  <path d="M0 610 680 548m-680 86 665-55m600 24 655 59m-641-32 641 67" stroke="#d8ce9e" stroke-width="5" opacity=".35"/>
+
+  <g>
+    <path d="M165 385h68v232h-68zM1648 383h68v235h-68z" fill="#39483e" stroke="#d3b84f" stroke-width="8"/>
+    <path d="M177 395h42v210h-42zM1660 393h43v213h-43z" fill="#566257"/>
+    <path d="M170 386h1547v28H170z" fill="#28382f" stroke="#cba94d" stroke-width="6"/>
+    <path d="M214 414h1458v86H214z" fill="#26372f" stroke="#d6bc6d" stroke-width="3"/>
+    <path d="M226 424h1434v66H226z" fill="#344b3e"/>
+    <path d="M274 439h1336" stroke="#91a08a" stroke-width="2" opacity=".5"/>
+    <text x="944" y="467" text-anchor="middle" fill="#f1dfaa" font-family="Arial,sans-serif" font-size="32" font-weight="700" letter-spacing="7">MINE SITE  •  ACCESS CONTROL</text>
+    <path d="M206 505h32v108h-32zM1631 502h32v111h-32z" fill="url(#hatch)" stroke="#dcc36d" stroke-width="3"/>
+    <path d="M205 515h-25v74h25M1663 513h25v76h-25" fill="none" stroke="#27372f" stroke-width="8"/>
+    <g fill="#f4d16b">
+      <circle cx="188" cy="616" r="8"/><circle cx="1690" cy="617" r="8"/>
+      <circle cx="241" cy="387" r="11"/><circle cx="1641" cy="385" r="11"/>
+    </g>
+    <path d="M180 625h1500" stroke="#252d27" stroke-width="9" opacity=".8"/>
+  </g>
+
+  <g transform="translate(257 396)">
+    <ellipse cx="144" cy="232" rx="190" ry="24" fill="#151a16" opacity=".42" filter="url(#softShadow)"/>
+    <path d="M0 77h277v139H0z" fill="#47564b" stroke="#27342d" stroke-width="9"/>
+    <path d="M16 91h245v113H16z" fill="url(#boothGlass)" stroke="#d0c58c" stroke-width="6"/>
+    <path d="M28 104h98v86H28zM144 104h103v86H144z" fill="#273d3b" opacity=".85"/>
+    <path d="M39 114h72v57H39zM154 114h82v57h-82z" fill="#a5beb6" opacity=".55"/>
+    <path d="M132 91v113m-112 7h255" stroke="#d5c795" stroke-width="6"/>
+    <path d="M-7 216h293v22H-7z" fill="#242c26"/>
+    <path d="M27 75V34h103V75m14 0V34h106V75" fill="#404c43" stroke="#27342d" stroke-width="7"/>
+    <path d="M19 32h246l-12-17H34z" fill="#d4ab42" stroke="#433e2b" stroke-width="5"/>
+    <text x="139" y="64" text-anchor="middle" fill="#17221c" font-family="Arial,sans-serif" font-size="15" font-weight="700" letter-spacing="2">SECURITY</text>
+    <path d="M239 216v-98" stroke="#d6dfcb" stroke-width="7"/>
+    <path d="M239 119 480 97" stroke="#e7d08a" stroke-width="14" stroke-linecap="round"/>
+    <path d="M239 119 480 97" stroke="#354238" stroke-width="5" stroke-dasharray="24 23" stroke-linecap="round"/>
+    <circle cx="239" cy="119" r="17" fill="#d4b550" stroke="#303a30" stroke-width="6"/>
+    <path d="M-4 216h292v12H-4z" fill="#d2b858"/>
+  </g>
+
+  <g transform="translate(760 479)">
+    <ellipse cx="145" cy="190" rx="262" ry="28" fill="#151915" opacity=".55" filter="url(#softShadow)"/>
+    <path d="M16 45 85 1l201 24-16 130L8 137Z" fill="url(#truckPaint)" stroke="#67461e" stroke-width="9"/>
+    <path d="m33 47 61-34 166 20-12 94L27 113Z" fill="#d98218" stroke="#ffd660" stroke-width="5"/>
+    <path d="m61 38 188 22m-197 3 193 21m-198 4 188 20" fill="none" stroke="#ffd256" stroke-width="6" opacity=".88"/>
+    <path d="M91 0 286 25l-5 27L68 25Z" fill="#f9c541" stroke="#ffeb9c" stroke-width="5"/>
+    <path d="M273 82 338 96l60 54-7 60h-111l-32-43Z" fill="url(#truckPaint)" stroke="#6b481e" stroke-width="8"/>
+    <path d="m300 99 52 12 33 36-73-6Z" fill="url(#glass)" stroke="#dfd1a5" stroke-width="6"/>
+    <path d="m312 105 29 7 22 25h-46Z" fill="#e2eee0" opacity=".5"/>
+    <path d="m388 153 28 12v43h-36Z" fill="#da7518" stroke="#62441f" stroke-width="5"/>
+    <path d="M8 139h408v42H8z" fill="#444941" stroke="#252b25" stroke-width="7"/>
+    <path d="M23 149h368" stroke="#e7b839" stroke-width="9"/>
+    <path d="M39 180h362" stroke="#1d241f" stroke-width="13"/>
+    <g fill="#222722" stroke="#888b7c" stroke-width="9">
+      <circle cx="81" cy="184" r="38"/><circle cx="187" cy="184" r="38"/><circle cx="337" cy="184" r="38"/>
+    </g>
+    <g fill="#c3c3b1" stroke="#414940" stroke-width="5">
+      <circle cx="81" cy="184" r="13"/><circle cx="187" cy="184" r="13"/><circle cx="337" cy="184" r="13"/>
+    </g>
+    <g fill="#f4c746">
+      <circle cx="81" cy="184" r="4"/><circle cx="187" cy="184" r="4"/><circle cx="337" cy="184" r="4"/>
+    </g>
+    <path d="M371 167h22v11h-22z" fill="#fff2af"/>
+    <path d="M282 17v35m-9-5 31 8" stroke="#f2c341" stroke-width="5"/>
+    <path d="m47 13 7-22h31l5 26" fill="#566258" stroke="#2c362e" stroke-width="5"/>
+    <path d="M384 126h45" stroke="#fff0b0" stroke-width="7" opacity=".7"/>
+  </g>
+
+  <g fill="#25362d" opacity=".9">
+    <path d="M63 591h117v-49h37v49h39v52H63zM1701 583h77v-40h27v40h53v61h-157z"/>
+    <path d="M85 548h26v-29h13v29h25v12H85zM1740 541h27v-31h13v31h31v13h-71z"/>
+  </g>
+  <g stroke="#d9c476" stroke-width="5" opacity=".85">
+    <path d="M28 655h217M1693 651h198M24 670h145M1755 672h157"/>
+  </g>
+  <g fill="#e1c66c"><path d="m238 648 14 7-14 7zM1692 644l14 7-14 7z"/></g>
+
+  <g transform="translate(553 548)">
+    <ellipse cx="15" cy="126" rx="29" ry="7" fill="#111713" opacity=".45"/>
+    <circle cx="15" cy="14" r="12" fill="#b98260"/><path d="M4 30h23l8 48H-3z" fill="#ed8b24" stroke="#563e27" stroke-width="3"/>
+    <path d="M1 39h28M-1 55h34" stroke="#f5e4a6" stroke-width="7"/>
+    <path d="M2 77 0 119m20-42 9 42" stroke="#29312a" stroke-width="10" stroke-linecap="round"/>
+    <path d="M3 8q1-18 13-18 14 0 15 18l7 4H-4z" fill="#f4c742" stroke="#73551f" stroke-width="3"/>
+    <path d="M-2 12h39" stroke="#fff0a2" stroke-width="4"/><path d="m2 18-8 14m35-14 9 14" stroke="#eadfc7" stroke-width="3"/>
+    <path d="M-4 43h37m-37 16h37" stroke="#fff4d0" stroke-width="2" opacity=".65"/>
+  </g>
+  <g transform="translate(1040 547) scale(1.08)">
+    <ellipse cx="15" cy="126" rx="29" ry="7" fill="#111713" opacity=".45"/>
+    <circle cx="15" cy="14" r="12" fill="#ae7858"/><path d="M4 30h23l8 48H-3z" fill="#e98722" stroke="#563e27" stroke-width="3"/>
+    <path d="M1 39h28M-1 55h34" stroke="#f6e8ad" stroke-width="7"/>
+    <path d="M2 77 0 119m20-42 9 42" stroke="#29312a" stroke-width="10" stroke-linecap="round"/>
+    <path d="M3 8q1-18 13-18 14 0 15 18l7 4H-4z" fill="#f4c742" stroke="#73551f" stroke-width="3"/>
+    <path d="M-2 12h39" stroke="#fff0a2" stroke-width="4"/><path d="m2 18-8 14m35-14 9 14" stroke="#eadfc7" stroke-width="3"/>
+    <path d="M-4 43h37m-37 16h37" stroke="#fff4d0" stroke-width="2" opacity=".65"/>
+  </g>
+  <g transform="translate(1208 559) scale(.92)">
+    <ellipse cx="15" cy="126" rx="29" ry="7" fill="#111713" opacity=".45"/>
+    <circle cx="15" cy="14" r="12" fill="#bd8864"/><path d="M4 30h23l8 48H-3z" fill="#d88321" stroke="#563e27" stroke-width="3"/>
+    <path d="M1 39h28M-1 55h34" stroke="#f2df9d" stroke-width="7"/>
+    <path d="M2 77 0 119m20-42 9 42" stroke="#29312a" stroke-width="10" stroke-linecap="round"/>
+    <path d="M3 8q1-18 13-18 14 0 15 18l7 4H-4z" fill="#f4c742" stroke="#73551f" stroke-width="3"/>
+    <path d="M-2 12h39" stroke="#fff0a2" stroke-width="4"/><path d="m2 18-8 14m35-14 9 14" stroke="#eadfc7" stroke-width="3"/>
+  </g>
+  <g transform="translate(1447 570) scale(.84)">
+    <ellipse cx="15" cy="126" rx="29" ry="7" fill="#111713" opacity=".45"/>
+    <circle cx="15" cy="14" r="12" fill="#a97859"/><path d="M4 30h23l8 48H-3z" fill="#e48a24" stroke="#563e27" stroke-width="3"/>
+    <path d="M1 39h28M-1 55h34" stroke="#f6e6a8" stroke-width="7"/>
+    <path d="M2 77 0 119m20-42 9 42" stroke="#29312a" stroke-width="10" stroke-linecap="round"/>
+    <path d="M3 8q1-18 13-18 14 0 15 18l7 4H-4z" fill="#f4c742" stroke="#73551f" stroke-width="3"/>
+    <path d="M-2 12h39" stroke="#fff0a2" stroke-width="4"/><path d="m2 18-8 14m35-14 9 14" stroke="#eadfc7" stroke-width="3"/>
+  </g>
+
+  <rect width="1920" height="840" fill="url(#grain)" opacity=".48"/>
+  <path d="M0 0h1920v840H0z" fill="none" stroke="#e4eee2" stroke-opacity=".26" stroke-width="24"/>
+  <path d="M18 18h62M18 18v48m1884-48h-62m62 0v48M18 822h62m-62 0v-48m1884 48h-62m62 0v-48" fill="none" stroke="#f0f0d8" stroke-opacity=".78" stroke-width="4"/>
+</svg>
